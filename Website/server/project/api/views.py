@@ -9,3 +9,12 @@ def get_usernames(request):
     usernames = Username.objects.all()
     serializedData = UsernameSerializer(usernames, many=True).data
     return Response(serializedData)
+
+@api_view(['POST'])
+def create_usernames(request):
+    data = request.data
+    serializer = UsernameSerializer(data=data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
