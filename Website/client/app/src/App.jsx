@@ -50,13 +50,13 @@ function App() {
 
   const updateTitle = async (pk, email) => {
      const userData = {
-      user: newTitle,
+      user: newTitle[pk],
       email: email,
     };
 
     try {
     
-      const response = await fetch(`http://127.0.0.1:8000/api/usernames/${pk}`, {
+      const response = await fetch(`http://127.0.0.1:8000/api/usernames/${pk}/`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -74,10 +74,14 @@ function App() {
           else {
             return user;
           }}
-         
-        )
+          )
       );
-      
+
+      setNewTitle((prev) => {
+        const updated = {...prev};
+        delete updated[pk];
+        return updated;
+      });
     }
      catch (err) {
         console.log(err);
@@ -87,7 +91,7 @@ function App() {
   const deleteUser = async (pk) => {
     try {
     
-      const response = await fetch(`http://127.0.0.1:8000/api/usernames/${pk}`, {
+      const response = await fetch(`http://127.0.0.1:8000/api/usernames/${pk}/`, {
         method: "DELETE",
         });
       
@@ -116,7 +120,13 @@ return (
       <div> 
         <p>Username: {username.user} </p> 
         <p>Email: {username.email} </p>  
-        <input type ="text" placeholder="New title..." />
+        <input type ="text" placeholder="New title..." value={newTitle[username.id] || ""}
+        onChange = {(e) => 
+          setNewTitle((prev) => ( {
+            ...prev, [username.id]: e.target.value
+          }))
+         }
+        />
         <button onClick={ () => updateTitle(username.id, username.email)}>Change</button>
         <button onClick={() => deleteUser(username.id)}> DELETE </button>
         </div>
