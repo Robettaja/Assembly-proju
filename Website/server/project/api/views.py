@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Username
 from .serializer import UsernameSerializer
+from django.shortcuts import render
 
 @api_view(['GET'])
 def get_usernames(request):

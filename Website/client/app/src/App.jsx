@@ -107,7 +107,7 @@ return (
     <>
       <h1> Auto kilpailu </h1>
 
-      <div>
+      <div class = "input-container">
         <input type="text" placeholder="Input your username" 
         onChange = {(e) => setUser(e.target.value)}
         />
