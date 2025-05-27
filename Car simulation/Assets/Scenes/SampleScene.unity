@@ -119,6 +119,11 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!4 &31095898 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4846959561363660158, guid: d61893b3c59fd6f4c93b093274320d27, type: 3}
+  m_PrefabInstance: {fileID: 1349871092042509817}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &77774982
 GameObject:
   m_ObjectHideFlags: 0
@@ -240,6 +245,7 @@ GameObject:
   - component: {fileID: 330585545}
   - component: {fileID: 330585544}
   - component: {fileID: 330585547}
+  - component: {fileID: 330585548}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -365,6 +371,19 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+--- !u!114 &330585548
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 330585543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9c17d7e64f392243bc0db2132388569, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 31095898}
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -535,26 +554,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1129371319 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2864224532390777893, guid: d61893b3c59fd6f4c93b093274320d27, type: 3}
-  m_PrefabInstance: {fileID: 1349871092042509817}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1129371321
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1129371319}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 608d086ae02e01740baa3c41419284c2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mass: 0.5
-  spring: 120
-  damper: 24
 --- !u!1001 &1349871092042509817
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -563,25 +562,9 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 3385984455688510488, guid: d61893b3c59fd6f4c93b093274320d27, type: 3}
-      propertyPath: m_Mass
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 3499439382419044913, guid: d61893b3c59fd6f4c93b093274320d27, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3499439382419044913, guid: d61893b3c59fd6f4c93b093274320d27, type: 3}
-      propertyPath: wheelManager
-      value: 
-      objectReference: {fileID: 1129371321}
-    - target: {fileID: 3840311464610741066, guid: d61893b3c59fd6f4c93b093274320d27, type: 3}
-      propertyPath: m_SuspensionSpring.spring
-      value: 1000
-      objectReference: {fileID: 0}
-    - target: {fileID: 4425414859410071428, guid: d61893b3c59fd6f4c93b093274320d27, type: 3}
-      propertyPath: m_SuspensionSpring.spring
-      value: 1000
+    - target: {fileID: 797829215851165430, guid: d61893b3c59fd6f4c93b093274320d27, type: 3}
+      propertyPath: spring
+      value: 124
       objectReference: {fileID: 0}
     - target: {fileID: 4846959561363660158, guid: d61893b3c59fd6f4c93b093274320d27, type: 3}
       propertyPath: m_LocalPosition.x
@@ -623,14 +606,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5261329484947784325, guid: d61893b3c59fd6f4c93b093274320d27, type: 3}
-      propertyPath: m_SuspensionSpring.spring
-      value: 1000
-      objectReference: {fileID: 0}
-    - target: {fileID: 6847439916552091341, guid: d61893b3c59fd6f4c93b093274320d27, type: 3}
-      propertyPath: m_SuspensionSpring.spring
-      value: 1000
-      objectReference: {fileID: 0}
     - target: {fileID: 8476620538751725183, guid: d61893b3c59fd6f4c93b093274320d27, type: 3}
       propertyPath: m_Name
       value: Car
@@ -638,10 +613,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 2864224532390777893, guid: d61893b3c59fd6f4c93b093274320d27, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1129371321}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d61893b3c59fd6f4c93b093274320d27, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
