@@ -56,7 +56,7 @@ function App() {
 
     try {
     
-      const response = await fetch('http://127.0.0.1:8000/api/usernames/${pk}', {
+      const response = await fetch(`http://127.0.0.1:8000/api/usernames/${pk}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -67,7 +67,7 @@ function App() {
       const data = await response.json();
       setUsernames((prev) => 
         prev.map((user) => {
-          if (book.id === pk)
+          if (user.id === pk)
           {
             return data;
           }
@@ -77,15 +77,29 @@ function App() {
          
         )
       );
-      console.log(data);
+      
     }
      catch (err) {
         console.log(err);
       }
   } 
 
+  const deleteUser = async (pk) => {
+    try {
+    
+      const response = await fetch(`http://127.0.0.1:8000/api/usernames/${pk}`, {
+        method: "DELETE",
+        });
+      
 
-  return (
+      setUsernames((prev) => prev.filter((user) => user.id !== pk));
+      }catch (err) {
+        console.log(err);
+        }  
+}
+
+
+return (
     <>
       <h1> Auto kilpailu </h1>
 
@@ -103,7 +117,8 @@ function App() {
         <p>Username: {username.user} </p> 
         <p>Email: {username.email} </p>  
         <input type ="text" placeholder="New title..." />
-        <button onClick={ () => updateTitle(user.id, user.email)}>Change</button>
+        <button onClick={ () => updateTitle(username.id, username.email)}>Change</button>
+        <button onClick={() => deleteUser(username.id)}> DELETE </button>
         </div>
       )}
           </>
