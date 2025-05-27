@@ -243,7 +243,7 @@ WheelCollider:
   m_Center: {x: 0, y: 0, z: 0}
   m_Radius: 0.25
   m_SuspensionSpring:
-    spring: 5000
+    spring: 1000
     damper: 500
     targetPosition: 0.5
   m_SuspensionDistance: 0.3
@@ -314,7 +314,7 @@ WheelCollider:
   m_Center: {x: 0, y: 0, z: 0}
   m_Radius: 0.25
   m_SuspensionSpring:
-    spring: 5000
+    spring: 1000
     damper: 500
     targetPosition: 0.5
   m_SuspensionDistance: 0.3
@@ -471,7 +471,7 @@ WheelCollider:
   m_Center: {x: 0, y: 0, z: 0}
   m_Radius: 0.25
   m_SuspensionSpring:
-    spring: 5000
+    spring: 1000
     damper: 500
     targetPosition: 0.5
   m_SuspensionDistance: 0.3
@@ -508,6 +508,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2299295972136150720}
+  - component: {fileID: 797829215851165430}
   m_Layer: 0
   m_Name: WheelColliders
   m_TagString: Untagged
@@ -534,6 +535,21 @@ Transform:
   - {fileID: 736569142830011498}
   m_Father: {fileID: 5623292442063318652}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &797829215851165430
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2864224532390777893}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 608d086ae02e01740baa3c41419284c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mass: 0.5
+  spring: 120
+  damper: 24
 --- !u!1 &4250076285215463821
 GameObject:
   m_ObjectHideFlags: 0
@@ -663,7 +679,7 @@ WheelCollider:
   m_Center: {x: 0, y: 0, z: 0}
   m_Radius: 0.25
   m_SuspensionSpring:
-    spring: 5000
+    spring: 1000
     damper: 500
     targetPosition: 0.5
   m_SuspensionDistance: 0.3
@@ -993,7 +1009,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8476620538751725183}
   serializedVersion: 5
-  m_Mass: 2
+  m_Mass: 10
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -1019,9 +1035,9 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8476620538751725183}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1bcb3b17ee025634392cf67fc8847c13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rb: {fileID: 3385984455688510488}
+  wheelManager: {fileID: 797829215851165430}

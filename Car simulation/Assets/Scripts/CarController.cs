@@ -12,8 +12,8 @@ public class CarController : MonoBehaviour
 
     private void Update()
     {
-        wheels[0].motorTorque = wheels[1].motorTorque =  3;
-        wheels[0].steerAngle = wheels[1].steerAngle =  16;
+        wheels[0].motorTorque = wheels[1].motorTorque =  32;
+        wheels[0].steerAngle = wheels[1].steerAngle =  0;
 
     }
 }
