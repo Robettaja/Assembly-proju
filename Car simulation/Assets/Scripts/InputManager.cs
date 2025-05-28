@@ -11,7 +11,7 @@ public class InputManager : MonoBehaviour,  InputSystem_Actions.ICarActions, Inp
     public static InputManager Instance;
 
 
-    private void Start()
+    private void Awake()
     {
         Instance = this;
 

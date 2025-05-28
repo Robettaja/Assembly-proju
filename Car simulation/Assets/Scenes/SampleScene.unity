@@ -385,7 +385,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   target: {fileID: 31095898}
   distance: 10
-  sensitivity: 0
+  sensitivity: 10
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0
@@ -523,7 +523,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &832575518
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -611,6 +611,14 @@ PrefabInstance:
     - target: {fileID: 797829215851165430, guid: d61893b3c59fd6f4c93b093274320d27, type: 3}
       propertyPath: spring
       value: 124
+      objectReference: {fileID: 0}
+    - target: {fileID: 3499439382419044913, guid: d61893b3c59fd6f4c93b093274320d27, type: 3}
+      propertyPath: speed
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3499439382419044913, guid: d61893b3c59fd6f4c93b093274320d27, type: 3}
+      propertyPath: rotationSpeed
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 4846959561363660158, guid: d61893b3c59fd6f4c93b093274320d27, type: 3}
       propertyPath: m_LocalPosition.x

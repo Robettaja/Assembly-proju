@@ -18,10 +18,9 @@ public class CameraController : MonoBehaviour
     private void Update()
     {
 
-        cameraInput = inputManager.GetNormalizedCarInput();
-        Debug.Log(cameraInput);
+        cameraInput = inputManager.GetNormalizedCameraInput();
         transform.position = target.position - transform.forward * distance; ;
-        transform.rotation = Quaternion.Euler(new Vector3(0, 180, 0));
+        transform.Rotate(new Vector3(sensitivity * cameraInput.y, sensitivity * cameraInput.x, 0));
         
     }
 }
