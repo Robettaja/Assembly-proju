@@ -4,7 +4,8 @@ using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour,  InputSystem_Actions.ICarActions, InputSystem_Actions.ICameraActions
 {
-    public InputSystem_Actions inputAction; 
+    public InputSystem_Actions inputAction;
+    public event Action OnCarFlip;
     
     private Vector2 carInput = Vector2.zero;
     private Vector2 cameraInput= Vector2.zero;
@@ -27,6 +28,12 @@ public class InputManager : MonoBehaviour,  InputSystem_Actions.ICarActions, Inp
     {
         carInput = context.ReadValue<Vector2>();
     }
+
+    public void OnFlip(InputAction.CallbackContext context)
+    {
+        OnCarFlip?.Invoke();
+    }
+
     public void OnCamMove(InputAction.CallbackContext context)
     {
         cameraInput = context.ReadValue<Vector2>();
