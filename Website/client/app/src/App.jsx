@@ -1,5 +1,4 @@
 import { use, useEffect,useState, useRef} from 'react';
-import Stopwatch from './assets/Stopwatch.jsx';
 import './App.css'
 
 function App() {
@@ -151,7 +150,7 @@ function App() {
   
       function reset(){
 
-        setLapsedTime(0);
+        setElapsedTime(0);
         setIsRunning(false);  
       }
   
@@ -206,8 +205,13 @@ return (
       )}
 
 */}    
+  <div>
+  <h1>Racetrack</h1>
+  <p>Enter you username and email to race</p>
+  </div>
 
-    <div>
+
+    <div class =  "input-container">
       {!submitted ? (
       <>
         <form onSubmit = {handleSubmit}>
@@ -233,22 +237,23 @@ return (
             
             <button onClick = {addUser} type="submit"> Lähetä </button>
           </form>
-
-        <div className = "stopwatch">
-        <div className = "display">{formatTime()}</div>
-        <div className = "controls">
-            <button onClick = {start} className = "start-button">Statt</button>
-            <button onClick = {stop} className = "stop-button">stop</button>
-            <button onClick = {reset} className = "reset-button">reset</button>
-          </div>
     
-    </div>
-  </>     
+
+          </>     
         ) : (
           <>
       <div>
         <h1>Hei, {user}!</h1>
-        <p>Nykyinen aika on: {time} </p>
+        <p>Nykyinen aika on:  </p>
+        <div className = "stopwatch">
+          <div className = "display">{formatTime()}</div>
+          <div className = "controls">
+              <button onClick = {start} className = "start-button">Statt</button>
+              <button onClick = {stop} className = "stop-button">stop</button>
+              <button onClick = {reset} className = "reset-button">reset</button>
+            </div>
+    
+    </div>
           <button onClick={() => setSubmitted(false)}>Palaa takaisin</button>
         
 
@@ -265,6 +270,7 @@ return (
           <div key = {username.id}> 
             <p> Username: {username.user} </p> 
             <p>Email: {username.email} </p>  
+            <button onClick={() => deleteUser(username.id)}> DELETE </button>
             </div>
           ))}
  </>
