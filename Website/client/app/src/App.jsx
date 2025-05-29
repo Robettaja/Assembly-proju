@@ -1,4 +1,5 @@
-import { use, useEffect,useState } from 'react'
+import { use, useEffect,useState, useRef} from 'react';
+import Stopwatch from './assets/Stopwatch.jsx';
 import './App.css'
 
 function App() {
@@ -8,6 +9,11 @@ function App() {
   const [newTitle, setNewTitle] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [time, setTime] = useState('');
+
+  const [isRunning, setIsRunning] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const intervalIdRef = useRef(null);
+  const startTimeRef = useRef(0);
 
 
   useEffect(() => {
@@ -104,6 +110,8 @@ function App() {
         }  
     }
 
+{/* username input and timer */}
+
   const handleSubmit = (e) => {
     e.preventDefault();
     addUser();
@@ -113,6 +121,56 @@ function App() {
     setTime(formattedTime);
 
   } 
+
+      useEffect(() => {
+
+
+        if(isRunning){
+            intervalIdRef.current = setInterval(() => {
+              setElapsedTime(Date.now() - startTimeRef.current);
+            }, 10);
+
+        }
+
+        return () => {
+          clearInterval(intervalIdRef.current);
+        }
+  
+  
+      }, [isRunning]);
+      function start(){ 
+          setIsRunning(true);
+          startTimeRef.current = Date.now() - elapsedTime;
+      } 
+  
+      function stop(){
+        setIsRunning(false);
+
+
+      }
+  
+      function reset(){
+
+        setLapsedTime(0);
+        setIsRunning(false);  
+      }
+  
+      function formatTime(){
+
+        let hours = Math.floor(elapsedTime / (1000 * 60 * 60));
+        let minutes = Math.floor(elapsedTime / (1000 * 60) % 60);
+        let seconds = Math.floor(elapsedTime / (1000) % 60);
+        let milliseconds = Math.floor(elapsedTime % 1000 / 10);
+        
+        hours = String(hours).padStart(2, "0");
+        minutes = String(minutes).padStart(2, "0");
+        seconds = String(seconds).padStart(2, "0");
+        milliseconds = String(milliseconds).padStart(2, "0");
+        return `${hours}:${minutes}:${seconds}:${milliseconds}`;
+  
+      }
+
+
 
 
 return (
@@ -151,6 +209,7 @@ return (
 
     <div>
       {!submitted ? (
+      <>
         <form onSubmit = {handleSubmit}>
             <label>
               Username:
@@ -174,23 +233,40 @@ return (
             
             <button onClick = {addUser} type="submit"> Lähetä </button>
           </form>
-          
+
+        <div className = "stopwatch">
+        <div className = "display">{formatTime()}</div>
+        <div className = "controls">
+            <button onClick = {start} className = "start-button">Statt</button>
+            <button onClick = {stop} className = "stop-button">stop</button>
+            <button onClick = {reset} className = "reset-button">reset</button>
+          </div>
+    
+    </div>
+  </>     
         ) : (
+          <>
       <div>
         <h1>Hei, {user}!</h1>
         <p>Nykyinen aika on: {time} </p>
           <button onClick={() => setSubmitted(false)}>Palaa takaisin</button>
         
+
+        
       </div>
+
+    
+    </>
     )}
-  {usernames.map((username) => (
+  
+
+    </div>
+    {usernames.map((username) => (
           <div key = {username.id}> 
             <p> Username: {username.user} </p> 
             <p>Email: {username.email} </p>  
             </div>
           ))}
-
-    </div>
  </>
   );
   
