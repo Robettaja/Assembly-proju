@@ -5,6 +5,7 @@ public class CarController : MonoBehaviour
 {
     [SerializeField] private float speed;
     [SerializeField] private float rotationAmount;
+    [SerializeField] private float rotationTime;
     [SerializeField] private float forwardVelKMH;
     
     private Vector2 carInputs;
@@ -31,12 +32,10 @@ public class CarController : MonoBehaviour
         {
             if (carInputs.magnitude != 0) ;
             wheels[i].brakeTorque = 0;
-            // if (i >= 2 && i <= 3)
-            {
-                wheels[i].motorTorque = speed * carInputs.y;
-            }
+            wheels[i].motorTorque = speed * carInputs.y;
             if (i >= 0 && i <= 1)
             {
+                
                 wheels[i].steerAngle = rotationAmount * carInputs.x;
             }
             

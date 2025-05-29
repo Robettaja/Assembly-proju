@@ -700,18 +700,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   update: 0
   radius: 0.25
-  wheelMass: 2
+  wheelMass: 1
   wheelDampingRate: 0.25
-  suspensionDistance: 0.2
+  suspensionDistance: 0.09
   suspensionSpring: 46.8
   suspensionDamper: 23.4
   suspensionTargetPosition: 0.4
-  forwardExtremumSlip: 0.4
+  forwardExtremumSlip: 1
   forwardExtremumValue: 1
   forwardAsymptoteSlip: 0.8
   forwardAsymptoteValue: 0.5
   forwardStiffness: 1
-  sidewaysExtremumSlip: 0.4
+  sidewaysExtremumSlip: 0.18
   sidewaysExtremumValue: 1
   sidewaysAsymptoteSlip: 0.8
   sidewaysAsymptoteValue: 0.5
