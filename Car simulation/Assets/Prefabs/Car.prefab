@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5623292442063318652}
   - component: {fileID: 623880389475734740}
   - component: {fileID: 2600158465168831977}
-  - component: {fileID: 7797241477682834342}
+  - component: {fileID: 5146511586690266222}
   m_Layer: 0
   m_Name: Hull
   m_TagString: Untagged
@@ -90,8 +90,8 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &7797241477682834342
-MeshCollider:
+--- !u!65 &5146511586690266222
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -108,10 +108,9 @@ MeshCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 2959467708922500008, guid: 4326eff0f984332458801d2350ae869c, type: 3}
+  serializedVersion: 3
+  m_Size: {x: 0.9, y: 0.8, z: 2}
+  m_Center: {x: 0, y: 0.60262966, z: 0}
 --- !u!1 &216147081833378413
 GameObject:
   m_ObjectHideFlags: 0
@@ -243,12 +242,12 @@ WheelCollider:
   m_Center: {x: 0, y: 0, z: 0}
   m_Radius: 0.25
   m_SuspensionSpring:
-    spring: 1000
-    damper: 500
+    spring: 24500
+    damper: 31500
     targetPosition: 0.5
   m_SuspensionDistance: 0.3
   m_ForceAppPointDistance: 0
-  m_Mass: 1
+  m_Mass: 20
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
     m_ExtremumSlip: 0.4
@@ -314,12 +313,12 @@ WheelCollider:
   m_Center: {x: 0, y: 0, z: 0}
   m_Radius: 0.25
   m_SuspensionSpring:
-    spring: 1000
-    damper: 500
+    spring: 24500
+    damper: 31500
     targetPosition: 0.5
   m_SuspensionDistance: 0.3
   m_ForceAppPointDistance: 0
-  m_Mass: 1
+  m_Mass: 20
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
     m_ExtremumSlip: 0.4
@@ -471,12 +470,12 @@ WheelCollider:
   m_Center: {x: 0, y: 0, z: 0}
   m_Radius: 0.25
   m_SuspensionSpring:
-    spring: 1000
-    damper: 500
+    spring: 24500
+    damper: 31500
     targetPosition: 0.5
   m_SuspensionDistance: 0.3
   m_ForceAppPointDistance: 0
-  m_Mass: 1
+  m_Mass: 20
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
     m_ExtremumSlip: 0.4
@@ -508,7 +507,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2299295972136150720}
-  - component: {fileID: 797829215851165430}
   m_Layer: 0
   m_Name: WheelColliders
   m_TagString: Untagged
@@ -529,27 +527,12 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 2757111772354499316}
-  - {fileID: 495001205084670729}
-  - {fileID: 7255876772057768811}
   - {fileID: 736569142830011498}
+  - {fileID: 7255876772057768811}
+  - {fileID: 495001205084670729}
+  - {fileID: 2757111772354499316}
   m_Father: {fileID: 5623292442063318652}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &797829215851165430
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2864224532390777893}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 608d086ae02e01740baa3c41419284c2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mass: 0.5
-  spring: 120
-  damper: 24
 --- !u!1 &4250076285215463821
 GameObject:
   m_ObjectHideFlags: 0
@@ -679,12 +662,12 @@ WheelCollider:
   m_Center: {x: 0, y: 0, z: 0}
   m_Radius: 0.25
   m_SuspensionSpring:
-    spring: 1000
-    damper: 500
+    spring: 24500
+    damper: 31500
     targetPosition: 0.5
   m_SuspensionDistance: 0.3
   m_ForceAppPointDistance: 0
-  m_Mass: 1
+  m_Mass: 20
   m_WheelDampingRate: 0.25
   m_ForwardFriction:
     m_ExtremumSlip: 0.4
@@ -1009,7 +992,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8476620538751725183}
   serializedVersion: 5
-  m_Mass: 10
+  m_Mass: 1500
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -1040,4 +1023,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bcb3b17ee025634392cf67fc8847c13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wheelManager: {fileID: 797829215851165430}
+  speed: 1000
+  rotationSpeed: 30
+  forwardVel: 0
