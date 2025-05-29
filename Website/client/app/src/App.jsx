@@ -5,8 +5,10 @@ function App() {
   const [usernames, setUsernames] = useState([]);
   const [user, setUser] = useState("");
   const [email, setEmail] = useState("");
-
   const [newTitle, setNewTitle] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [time, setTime] = useState('');
+
 
   useEffect(() => {
     fetchUsernames();
@@ -100,13 +102,26 @@ function App() {
       }catch (err) {
         console.log(err);
         }  
-}
+    }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    addUser();
+    setSubmitted(true);
+    const now = new Date();
+    const formattedTime = now.toLocaleDateString();
+    setTime(formattedTime);
+
+  } 
 
 
 return (
     <>
-      <h1> Auto kilpailu </h1>
 
+
+
+    {/*
+      <h1> Auto kilpailu </h1>
       <div class = "input-container">
         <input type="text" placeholder="Input your username" 
         onChange = {(e) => setUser(e.target.value)}
@@ -131,8 +146,55 @@ return (
         <button onClick={() => deleteUser(username.id)}> DELETE </button>
         </div>
       )}
-          </>
-  )
-}
+
+*/}    
+
+    <div>
+      {!submitted ? (
+        <form onSubmit = {handleSubmit}>
+            <label>
+              Username:
+              <input
+                type = "text" 
+                value = {user}
+                onChange = {(e) => setUser(e.target.value)}
+                required
+              />
+            </label>
+            <label>
+              Email:
+              <input
+              type = "text"
+              value = {email}
+              onChange = {(e) => setEmail(e.target.value)}
+              
+              />
+            </label>
+
+            
+            <button onClick = {addUser} type="submit"> Lähetä </button>
+          </form>
+          
+        ) : (
+      <div>
+        <h1>Hei, {user}!</h1>
+        <p>Nykyinen aika on: {time} </p>
+          <button onClick={() => setSubmitted(false)}>Palaa takaisin</button>
+        
+      </div>
+    )}
+  {usernames.map((username) => (
+          <div key = {username.id}> 
+            <p> Username: {username.user} </p> 
+            <p>Email: {username.email} </p>  
+            </div>
+          ))}
+
+    </div>
+ </>
+  );
+  
+  }
+
 
 export default App
