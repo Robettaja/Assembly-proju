@@ -267,7 +267,7 @@ return (
 
     </div>
     {usernames.map((username) => (
-          <div key = {username.id}> 
+          <div class = "saved-data" key = {username.id}> 
             <p> Username: {username.user} </p> 
             <p>Email: {username.email} </p>  
             <button onClick={() => deleteUser(username.id)}> DELETE </button>
