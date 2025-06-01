@@ -5,6 +5,12 @@
 - Inputs Grayscale image
 - Used in feature detection
 
+### Methods
+
+- Laplacian
+- Sobel
+- Canny
+
 ## Contours
 
 - Represents Object shape & boundaries
