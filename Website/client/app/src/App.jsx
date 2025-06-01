@@ -235,13 +235,15 @@ return (
             </label>
 
             
-            <button onClick = {addUser} type="submit"> Lähetä </button>
+            <button type="submit"> Lähetä </button>
           </form>
     
 
           </>     
         ) : (
-          <>
+  
+  
+  <>
       <div>
         <h1>Hei, {user}!</h1>
         <p>Nykyinen aika on:  </p>
@@ -252,27 +254,24 @@ return (
               <button onClick = {stop} className = "stop-button">stop</button>
               <button onClick = {reset} className = "reset-button">reset</button>
             </div>
-    
-    </div>
-          <button onClick={() => setSubmitted(false)}>Palaa takaisin</button>
+        </div>
         
-
-        
+        <button onClick={() => setSubmitted(false)}>Palaa takaisin</button>
       </div>
-
-    
-    </>
-    )}
-  
-
-    </div>
-    {usernames.map((username) => (
+    <>
+      {usernames.map((username) => (
           <div class = "saved-data" key = {username.id}> 
             <p> Username: {username.user} </p> 
             <p>Email: {username.email} </p>  
             <button onClick={() => deleteUser(username.id)}> DELETE </button>
             </div>
           ))}
+    </>
+    
+  </>
+    )} </div>
+
+    
  </>
   );
   

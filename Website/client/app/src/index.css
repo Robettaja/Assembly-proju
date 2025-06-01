@@ -98,6 +98,7 @@ button:focus-visible {
 
 .saved-data {
   display: flex;
+  
   margin: 0 auto;
 
   border: solid 2px black;
