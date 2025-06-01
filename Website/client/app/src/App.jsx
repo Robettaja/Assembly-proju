@@ -1,5 +1,7 @@
 import { use, useEffect,useState, useRef} from 'react';
 import './App.css'
+import { VscChromeClose } from "react-icons/vsc";
+import { VscArrowLeft } from "react-icons/vsc";
 
 function App() {
   const [usernames, setUsernames] = useState([]);
@@ -30,6 +32,7 @@ function App() {
   };
 
   const addUser = async () => {
+    console.log("adduser called")
     const userData = {
       user: user,
       email: email,
@@ -111,15 +114,16 @@ function App() {
 
 {/* username input and timer */}
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    addUser();
+    await addUser();
     setSubmitted(true);
     const now = new Date();
     const formattedTime = now.toLocaleDateString();
     setTime(formattedTime);
 
   } 
+  
 
       useEffect(() => {
 
@@ -137,6 +141,8 @@ function App() {
   
   
       }, [isRunning]);
+
+
       function start(){ 
           setIsRunning(true);
           startTimeRef.current = Date.now() - elapsedTime;
@@ -168,6 +174,8 @@ function App() {
         return `${hours}:${minutes}:${seconds}:${milliseconds}`;
   
       }
+
+
 
 
 
@@ -214,37 +222,39 @@ return (
     <div class =  "input-container">
       {!submitted ? (
       <>
-        <form onSubmit = {handleSubmit}>
-            <label>
-              Username:
-              <input
-                type = "text" 
-                value = {user}
-                onChange = {(e) => setUser(e.target.value)}
-                required
-              />
-            </label>
-            <label>
-              Email:
-              <input
-              type = "text"
-              value = {email}
-              onChange = {(e) => setEmail(e.target.value)}
-              
-              />
-            </label>
+        <div className='view'>
+          <form onSubmit = {handleSubmit}>
+              <label>
+                Username:
+                <input
+                  type = "text" 
+                  value = {user}
+                  onChange = {(e) => setUser(e.target.value)}
+                  required
+                />
+              </label>
+              <label>
+                Email:
+                <input
+                type = "text"
+                value = {email}
+                onChange = {(e) => setEmail(e.target.value)}
+                
+                />
+              </label>
 
-            
-            <button type="submit"> Lähetä </button>
-          </form>
-    
+              
+              <button type="submit"> Lähetä </button>
+            </form>
+        </div>
 
           </>     
         ) : (
   
   
   <>
-      <div>
+      <div className='view'>
+        <button onClick={() => setSubmitted(false)} id = "back-arrow"> <VscArrowLeft /></button>
         <h1>Hei, {user}!</h1>
         <p>Nykyinen aika on:  </p>
         <div className = "stopwatch">
@@ -256,15 +266,20 @@ return (
             </div>
         </div>
         
-        <button onClick={() => setSubmitted(false)}>Palaa takaisin</button>
+        
       </div>
     <>
       {usernames.map((username) => (
           <div class = "saved-data" key = {username.id}> 
-            <p> Username: {username.user} </p> 
-            <p>Email: {username.email} </p>  
-            <button onClick={() => deleteUser(username.id)}> DELETE </button>
+            <button onClick={() => deleteUser(username.id)} id= "x-button" > <VscChromeClose /> </button>
+          
+          
+            <div className='username-email'>
+              Username: {username.user}  <br></br>
+              Email: {username.email} 
             </div>
+            
+          </div>
           ))}
     </>
     
