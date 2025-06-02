@@ -2,6 +2,8 @@ import { use, useEffect,useState, useRef} from 'react';
 import './App.css'
 import { VscChromeClose } from "react-icons/vsc";
 import { VscArrowLeft } from "react-icons/vsc";
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import Users from './pages/Users.jsx';
 
 function App() {
   const [usernames, setUsernames] = useState([]);
@@ -112,7 +114,7 @@ function App() {
         }  
     }
 
-{/* username input and timer */}
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -175,17 +177,11 @@ function App() {
   
       }
 
-
-
-
-
-
-return (
+  return (
     <>
+      {/*
 
-
-
-    {/*
+```
       <h1> Auto kilpailu </h1>
       <div class = "input-container">
         <input type="text" placeholder="Input your username" 
@@ -213,7 +209,18 @@ return (
       )}
 
 */}    
-  <div>
+  <>
+  <Router>
+    <nav>
+      <Link to="/">Home</Link> | <Link to ="/users">Users</Link>
+    </nav>
+
+    <Routes>
+      <Route path="/" element={
+        <>
+        
+
+        <div>
   <h1>Racetrack</h1>
   <p>Enter you username and email to race</p>
   </div>
@@ -281,16 +288,28 @@ return (
             
           </div>
           ))}
+      </>
     </>
+    )} 
+    </div>
+        </>
     
-  </>
-    )} </div>
+      } />
 
-    
- </>
+      <Route path = "/users" element = {<Users />} />
+    </Routes>
+
+  </Router>
   );
   
   }
 
 
+  </Router>
+  </>
+  );
+}
+
 export default App
+
+```
