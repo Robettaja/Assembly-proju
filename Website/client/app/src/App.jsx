@@ -210,106 +210,75 @@ function App() {
 
 */}    
   <>
-  <Router>
-    <nav>
-      <Link to="/">Home</Link> | <Link to ="/users">Users</Link>
-    </nav>
 
-    <Routes>
-      <Route path="/" element={
-        <>
-        
+      <div>
+        <h1>Racetrack</h1>
+        <p>Enter your username and email to race</p>
+      </div>
 
-        <div>
-  <h1>Racetrack</h1>
-  <p>Enter you username and email to race</p>
-  </div>
-
-
-    <div class =  "input-container">
-      {!submitted ? (
-      <>
-        <div className='view'>
-          <form onSubmit = {handleSubmit}>
+      <div className="input-container">
+        {!submitted ? (
+          <div className="view">
+            <form onSubmit={handleSubmit}>
               <label>
                 Username:
                 <input
-                  type = "text" 
-                  value = {user}
-                  onChange = {(e) => setUser(e.target.value)}
+                  type="text"
+                  value={user}
+                  onChange={(e) => setUser(e.target.value)}
                   required
                 />
               </label>
               <label>
                 Email:
                 <input
-                type = "text"
-                value = {email}
-                onChange = {(e) => setEmail(e.target.value)}
-                
+                  type="text"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </label>
-
-              
-              <button type="submit"> Lähetä </button>
+              <button type="submit">Lähetä</button>
             </form>
-        </div>
-
-          </>     
-        ) : (
-  
-  
-  <>
-      <div className='view'>
-        <button onClick={() => setSubmitted(false)} id = "back-arrow"> <VscArrowLeft /></button>
-        <h1>Hei, {user}!</h1>
-        <p>Nykyinen aika on:  </p>
-        <div className = "stopwatch">
-          <div className = "display">{formatTime()}</div>
-          <div className = "controls">
-              <button onClick = {start} className = "start-button">Statt</button>
-              <button onClick = {stop} className = "stop-button">stop</button>
-              <button onClick = {reset} className = "reset-button">reset</button>
-            </div>
-        </div>
-        
-        
-      </div>
-    <>
-      {usernames.map((username) => (
-          <div class = "saved-data" key = {username.id}> 
-            <button onClick={() => deleteUser(username.id)} id= "x-button" > <VscChromeClose /> </button>
-          
-          
-            <div className='username-email'>
-              Username: {username.user}  <br></br>
-              Email: {username.email} 
-            </div>
-            
           </div>
-          ))}
-      </>
+        ) : (
+          <>
+            <div className="view">
+              <button onClick={() => setSubmitted(false)} id="back-arrow">
+                <VscArrowLeft />
+              </button>
+              <h1>Hei, {user}!</h1>
+              <p>Nykyinen aika on: </p>
+              <div className="stopwatch">
+                <div className="display">{formatTime()}</div>
+                <div className="controls">
+                  <button onClick={start} className="start-button">Start</button>
+                  <button onClick={stop} className="stop-button">Stop</button>
+                  <button onClick={reset} className="reset-button">Reset</button>
+                </div>
+              </div>
+            </div>
+
+            {usernames.map((username) => (
+              <div className="saved-data" key={username.id}>
+                <button onClick={() => deleteUser(username.id)} id="x-button">
+                  <VscChromeClose />
+                </button>
+                <div className="username-email">
+                  Username: {username.user} <br />
+                  Email: {username.email}
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+      </div>
     </>
-    )} 
-    </div>
-        </>
+      <div className="footer">
+        <p>© 2023 Racetrack. All rights reserved.</p>
+      </div>
+    </>
     
-      } />
-
-      <Route path = "/users" element = {<Users />} />
-    </Routes>
-
-  </Router>
-  );
-  
-  }
-
-
-  </Router>
-  </>
   );
 }
 
-export default App
-
-```
+export default App;
