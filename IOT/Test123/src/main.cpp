@@ -3,8 +3,8 @@
 
 WiFiUDP Udp;
 
-const char *ssid = "WIFI_NAME";
-const char *pass = "WIFI_PASS";
+const char *ssid = "Roope";
+const char *pass = "12345678";
 
 unsigned int port = 420;
 char packetBuffer[255];
@@ -14,7 +14,6 @@ void setup() {
   while (!Serial)
     ;
   WiFi.begin(ssid, pass); // Start connecting to WiFi
-  Serial.println("");
   Serial.println("WiFi connected!");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
@@ -22,26 +21,23 @@ void setup() {
   Udp.begin(port);
 }
 void loop() {
+  float i0;
+  float i1;
   int packetSize = Udp.parsePacket();
-  if (packetSize) {
-    Serial.println(1);
-    int len = Udp.read(packetBuffer, 255);
-    if (len > 0)
-      packetBuffer[len] = 0;
-    char cmd = packetBuffer[0];
-    switch (cmd) {
-    case 'L':
-      digitalWrite(LED_BUILTIN, LOW);
-      Serial.println("IP address: ");
-      break;
-    case 'R':
-      digitalWrite(LED_BUILTIN, HIGH);
-      Serial.println("address: ");
-      break;
-    case 'U':;
-      break;
-    case 'D':;
-      break;
+  if (packetSize == 8) {
+    Udp.read((char *)&i0, 4);
+    Udp.read((char *)&i1, 4);
+    int hForce = i0 * 255;
+    int vForce = i1 * 255;
+    if (hForce > 0 ) {
+      analogWrite(LED_BUILTIN, 255);
+    } else if(hForce < 0) {
+      analogWrite(LED_BUILTIN, 0);
+    }
+    if (vForce > 0) {
+      analogWrite(LED_BUILTIN, 255);
+    } else if(vForce < 0) {
+      analogWrite(LED_BUILTIN, 0);
     }
   }
 }

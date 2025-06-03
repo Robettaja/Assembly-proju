@@ -1,55 +1,65 @@
 import pygame
 import serial
 import socket
+import struct
 import time
+from dotenv import load_dotenv
+import os
 
 
-UDP_IP = "192.168.33.160"
-UDP_PORT = 420
-
-
-def send_cmd(cmd):
-    print(UDP_IP, UDP_PORT, cmd)
-    global last_cmd
-    if cmd != last_cmd:
-        sock.sendto(cmd.encode(), (UDP_IP, UDP_PORT))
-        last_cmd = cmd
-        print(f"Sent: {cmd}")
+class User:
+    def __init__(
+        self, joystick: pygame.joystick.JoystickType, name: str, is_player: bool = True
+    ):
+        load_dotenv("ipdata.env")
+        joystick.init()
+        print("Connected to controller:", joystick.get_name(), joystick.get_guid())
+        self.id = joystick.get_id() if is_player else -1
+        self.name = name
+        self.speed = 1.0
+        if not is_player:
+            self.ip = os.getenv("AI_IP")
+        else:
+            self.ip = os.getenv("IP" + str(self.id + 1))
+        self.is_player = is_player
+        self.controller = joystick
 
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-last_cmd = None
+sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+sock.setblocking(False)
 
 pygame.init()
+clock = pygame.time.Clock()
 
 pygame.joystick.init()
 
 if pygame.joystick.get_count() == 0:
     print("No controller connected.")
     exit()
+users = []
 
-joystick = pygame.joystick.Joystick(0)
-joystick.init()
-print(f"Connected to: {joystick.get_name()}")
+users.append(User(pygame.joystick.Joystick(0), "Pekka Pomo", True))
+users.append(User(pygame.joystick.Joystick(0), "PekPom", False))
+
+PORT = 420
+
 
 try:
     while True:
         pygame.event.pump()
-
-        lr = joystick.get_axis(0)
-        lu = -1 * joystick.get_axis(1)
-        data = None
-        if lr > 0.9:
-            data = "R"
-        elif lr < -0.9:
-            data = "L"
-        if data:
-            print("sent data")
-            send_cmd(data)
-        time.sleep(0.05)
+        for user in users:
+            lr = user.controller.get_axis(0) * user.speed
+            lu = -user.controller.get_axis(1) * user.speed
+            data = None
+            if user.ip != "0.0.0.0":
+                if lr != 0 and lu != 0:
+                    data = struct.pack("ff", lr, lu)
+                if data:
+                    sock.sendto(data, (user.ip, PORT))
+        clock.tick(60)
 
 except KeyboardInterrupt:
     print("Exiting...")
 finally:
-    joystick.quit()
     pygame.quit()
