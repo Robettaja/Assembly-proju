@@ -2,7 +2,9 @@ import { use, useEffect,useState, useRef} from 'react';
 import './App.css'
 import { VscChromeClose } from "react-icons/vsc";
 import { VscArrowLeft } from "react-icons/vsc";
+
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+
 
 
 function App() {
@@ -19,6 +21,7 @@ function App() {
   const intervalIdRef = useRef(null);
   const startTimeRef = useRef(0);
   const [lastUserId, setLastUserId] = useState(null);
+  const [activeMenu, setActiveMenu] = useState(false);
 
 
   useEffect(() => {
@@ -222,8 +225,50 @@ function App() {
         </div>
       )}
 
+
+
 */}    
+
+    <div>
+      
+  
+        <div className="nav-bar">
+            
+            <div className={` ${activeMenu ? "right-0" : "right-[400px]"}
+            } h-screen w-full max-w-[400px] bg-zinc-800 absolute top-0 duration-500`}
+            >
+              <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/about">Users</a></li>
+                </ul>
+
+            </div>
+
+            <button
+            onClick={() => {
+              setActiveMenu(!activeMenu);
+            }}
+            className={`hamburger-menu ${activeMenu && "active"}`}
+                
+            >
+                <span className="bar"></span>
+                <span className="bar"></span>
+                <span className="bar"></span>
+            </button>
+
+           
+            {activeMenu && (
+                <div className="menu">
+                   
+                </div>
+            )}
+        </div>
+
+    </div>
+
   <>
+
+
 
       <div>
         <h1>Racetrack</h1>

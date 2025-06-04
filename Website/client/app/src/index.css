@@ -31,6 +31,71 @@ body {
   
 }
 
+.nav-bar button {
+  background-color: transparent;
+  border:none;
+}
+
+
+
+
+.hamburger-menu {
+  position: relative;
+  height: 50px;
+  width: 80px;
+  padding: 1px;
+  cursor: pointer;
+}
+
+.hamburger-menu:hover span {
+  background-color: black;
+}
+
+.hamburger-menu span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 5px;
+  width: 70%;
+  background-color: white;
+  border-radius: 5px;
+  transition: .2s ease;
+}
+
+.hamburger-menu span:nth-child(1) {
+  top: 25%;
+}
+
+.hamburger-menu span:nth-child(2) {
+  
+}
+
+.hamburger-menu span:nth-child(3) {
+  top: 75%;
+}
+
+.hamburger-menu.active span {
+  background-color: white;
+}
+
+.hamburger-menu.active span:nth-child(1) {
+  transform: translate(-50%, -50%) rotate(-45deg);
+  top: 50%;
+  width: 50%;
+}
+
+.hamburger-menu.active span:nth-child(2) {
+  opacity: 0;
+  
+}
+
+.hamburger-menu.active span:nth-child(3) {
+  transform: translate(-50%, -50%) rotate(45deg);
+  top: 50%;
+  width: 50%;
+}
+
 h1 {
   font-size: 4em;
   line-height: 1.1;
@@ -111,10 +176,6 @@ button:hover {
   border-color: #646cff;
 }
 
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
 
 .saved-data {
  
