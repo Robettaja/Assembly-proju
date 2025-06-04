@@ -3,7 +3,7 @@ import './App.css'
 import { VscChromeClose } from "react-icons/vsc";
 import { VscArrowLeft } from "react-icons/vsc";
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import Users from './pages/Users.jsx';
+
 
 function App() {
   const [usernames, setUsernames] = useState([]);
@@ -14,9 +14,11 @@ function App() {
   const [time, setTime] = useState('');
 
   const [isRunning, setIsRunning] = useState(false);
+  const [laps, setLaps] = useState([]);
   const [elapsedTime, setElapsedTime] = useState(0);
   const intervalIdRef = useRef(null);
   const startTimeRef = useRef(0);
+  const [lastUserId, setLastUserId] = useState(null);
 
 
   useEffect(() => {
@@ -52,6 +54,7 @@ function App() {
       });
       const data = await response.json();
       setUsernames((prev) => [...prev, data]);
+      setLastUserId(data.id);
       console.log(data);
     }
      catch (err) {
@@ -150,11 +153,22 @@ function App() {
           startTimeRef.current = Date.now() - elapsedTime;
       } 
   
-      function stop(){
+      const stop = async () => {
         setIsRunning(false);
+        const lapTime = formatTime();
+        setLaps((prev) => [...prev, lapTime]);
 
+        if (lastUserId) {
+          await fetch(`http:////127.0.0.1:8000/api/usernames/${lastUserId}/`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json"},
+            body: JSON.stringify({laptime: lapTime, user, email }),
+          });
+        }
 
-      }
+        reset();
+      };
   
       function reset(){
 
@@ -265,7 +279,8 @@ function App() {
                 </button>
                 <div className="username-email">
                   Username: {username.user} <br />
-                  Email: {username.email}
+                  Email: {username.email} <br />
+                  Laptime: {username.lapTime}
                 </div>
               </div>
             ))}
