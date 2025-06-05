@@ -2,6 +2,7 @@ import { use, useEffect,useState, useRef} from 'react';
 import './App.css'
 import { VscChromeClose } from "react-icons/vsc";
 import { VscArrowLeft } from "react-icons/vsc";
+import Users from './pages/Users';
 
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
@@ -195,7 +196,11 @@ function App() {
       }
 
   return (
-    <>
+    
+<>
+
+
+
       {/*
 
 ```
@@ -228,43 +233,43 @@ function App() {
 
 
 */}    
-
+  <Router>
     <div>
-      
-  
         <div className="nav-bar">
             
-            <div className={` ${activeMenu ? "right-0" : "right-[400px]"}
-            } h-screen w-full max-w-[400px] bg-zinc-800 absolute top-0 duration-500`}
-            >
+            <div className={`${activeMenu ? "right-0" : "right-[400px]"}
+              } h-screen w-full max-w-[400px] bg-zinc-800 absolute top-0 duration-500`}
+              >
               <ul>
-                        <li><a href="/">Home</a></li>
-                        <li><a href="/about">Users</a></li>
-                </ul>
-
-            </div>
+                      <li><Link to="/">Home</Link></li>
+                      <li><Link to ="/users">Users</Link></li>
+              </ul>
 
             <button
-            onClick={() => {
-              setActiveMenu(!activeMenu);
-            }}
-            className={`hamburger-menu ${activeMenu && "active"}`}
-                
-            >
-                <span className="bar"></span>
-                <span className="bar"></span>
-                <span className="bar"></span>
+              onClick={() => {
+                setActiveMenu(!activeMenu);
+              }}
+              className={`hamburger-menu ${activeMenu && "active"}`}
+                  
+              >
+                  <span className="bar"></span>
+                  <span className="bar"></span>
+                  <span className="bar"></span>
             </button>
 
-           
-            {activeMenu && (
-                <div className="menu">
-                   
-                </div>
-            )}
+            
+              {activeMenu && (
+                  <div className="menu">
+                    
+                  </div>
+              )}
+              </div>
         </div>
+      <Routes>
+        <Route path="/" element={
 
-    </div>
+          
+        <div>
 
   <>
 
@@ -317,18 +322,7 @@ function App() {
               </div>
             </div>
 
-            {usernames.map((username) => (
-              <div className="saved-data" key={username.id}>
-                <button onClick={() => deleteUser(username.id)} id="x-button">
-                  <VscChromeClose />
-                </button>
-                <div className="username-email">
-                  Username: {username.user} <br />
-                  Email: {username.email} <br />
-                  Laptime: {username.lapTime}
-                </div>
-              </div>
-            ))}
+            
           </>
         )}
       </div>
@@ -336,8 +330,26 @@ function App() {
       <div className="footer">
         <p>© 2023 Racetrack. All rights reserved.</p>
       </div>
-    </>
     
+    
+        </div>
+
+
+        } />
+        <Route path="/users" element={
+          <Users
+            usernames = {usernames}
+            deleteUser={deleteUser}
+            />
+        } />
+
+      </Routes>
+          
+  </div>
+
+</Router>
+
+</>
   );
 }
 
