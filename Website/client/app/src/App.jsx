@@ -67,45 +67,7 @@ function App() {
     
   };
 
-  const updateTitle = async (pk, email) => {
-     const userData = {
-      user: newTitle[pk],
-      email: email,
-    };
-
-    try {
-    
-      const response = await fetch(`http://127.0.0.1:8000/api/usernames/${pk}/`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userData),
-
-      });
-      const data = await response.json();
-      setUsernames((prev) => 
-        prev.map((user) => {
-          if (user.id === pk)
-          {
-            return data;
-          }
-          else {
-            return user;
-          }}
-          )
-      );
-
-      setNewTitle((prev) => {
-        const updated = {...prev};
-        delete updated[pk];
-        return updated;
-      });
-    }
-     catch (err) {
-        console.log(err);
-      }
-  } 
+ 
 
   const deleteUser = async (pk) => {
     try {
@@ -131,6 +93,9 @@ function App() {
     const formattedTime = now.toLocaleDateString();
     setTime(formattedTime);
 
+
+    setUser("");
+    setEmail("");
   } 
   
 
