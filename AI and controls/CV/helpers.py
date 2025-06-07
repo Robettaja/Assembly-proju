@@ -11,6 +11,5 @@ def preprocessImage(image):
     image = cv.GaussianBlur(image, (11, 11), 0)
 
     ret, image = cv.threshold(image, 40, 255, cv.THRESH_BINARY)
-    cv.imshow("Preprocessed Image", image)
 
     return image
