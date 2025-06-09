@@ -134,6 +134,7 @@ function App() {
               "Content-Type": "application/json"},
             body: JSON.stringify({laptime: lapTime, user, email }),
           });
+          fetchUsernames(); // Refresh the list of usernames
         }
 
         reset();
