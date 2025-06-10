@@ -34,8 +34,20 @@ def usernames_detail(request, pk):
     
     elif request.method == 'PUT':
         data = request.data
-        serializer = UsernameSerializer(usernames, data=data)
+        serializer = UsernameSerializer(usernames, data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status = status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+def update_user(request, pk): 
+    try:
+        user = Username.objects.get(pk=pk)
+    except Username.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    serializer = UsernameSerializer(user, data=request.data, partial=true)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
