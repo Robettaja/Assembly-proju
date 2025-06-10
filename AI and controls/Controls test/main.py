@@ -7,6 +7,18 @@ from dotenv import load_dotenv
 import os
 
 
+def move_towards_target(current, target, speed, dt):
+    if current < target:
+        current += dt / speed
+        if current > target:
+            current = target
+    elif current > target:
+        current -= dt / speed
+        if current < target:
+            current = target
+    return current
+
+
 class User:
     def __init__(
         self, joystick: pygame.joystick.JoystickType, name: str, is_player: bool = True
@@ -45,18 +57,6 @@ users.append(User(pygame.joystick.Joystick(0), "PekPom", False))
 PORT = 420
 
 
-def move_towards_target(current, target, speed, dt):
-    if current < target:
-        current += speed * dt
-        if current > target:
-            current = target
-    elif current > target:
-        current -= speed * dt
-        if current < target:
-            current = target
-    return current
-
-
 currentX = 0.0
 currentY = 0.0
 
@@ -67,8 +67,8 @@ try:
         for user in users:
             targetX = user.controller.get_axis(2) * user.speed
             targetY = -user.controller.get_axis(1) * user.speed
-            currentX = move_towards_target(currentX, targetX, 0.5, dt)
-            currentY = move_towards_target(currentY, targetX, 0.5, dt)
+            currentX = move_towards_target(currentX, targetX, 2, dt)
+            currentY = move_towards_target(currentY, targetX, 2, dt)
             if user.ip != "0.0.0.0":
                 data = struct.pack("ff", currentY, currentX)
                 if data:
