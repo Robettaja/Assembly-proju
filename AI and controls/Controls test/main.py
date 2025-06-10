@@ -45,18 +45,23 @@ users.append(User(pygame.joystick.Joystick(0), "PekPom", False))
 PORT = 420
 
 
+last_lr = 0
+last_lu = 0
+
 try:
     while True:
         pygame.event.pump()
         for user in users:
-            lr = user.controller.get_axis(0) * user.speed
+            lr = user.controller.get_axis(2) * user.speed
             lu = -user.controller.get_axis(1) * user.speed
-            data = None
             if user.ip != "0.0.0.0":
-                if lr != 0 and lu != 0:
+                is_changed = lr != last_lr or lu != last_lu
+                if is_changed:
                     data = struct.pack("ff", lr, lu)
-                if data:
-                    sock.sendto(data, (user.ip, PORT))
+                    if data:
+                        sock.sendto(data, (user.ip, PORT))
+                        last_lr = lr
+                        last_lu = lu
         clock.tick(60)
 
 except KeyboardInterrupt:
