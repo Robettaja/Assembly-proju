@@ -44,15 +44,19 @@ void loop() {
     Udp.read(buf, 8);
     memcpy(&i0, buf, 4);
     memcpy(&i1, buf + 4, 4);
-    int hForce = i0 * 255;
-    int vForce = i1 * 255;
+    int hForce = i1 * 255;
+    int vForce = i0 * 255;
     if (i0 > 0.05) {
-      analogWrite(LED_BUILTIN, 255);
-    } else if (i0 < 0) {
+      analogWrite(LED_BUILTIN, vForce);
+    } else if (i0 < -0.05) {
+
+    } else {
+
       analogWrite(LED_BUILTIN, 0);
     }
     if (i1 > 0.05) {
-    } else if (i1 < 0) {
+    } else if (i1 < -0.05) {
+    } else {
     }
   }
 }
