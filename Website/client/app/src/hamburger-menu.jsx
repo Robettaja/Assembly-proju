@@ -1,6 +1,6 @@
 import {useState} from "react";
 
-const Hamburger = () => {
+const App = () => {
     const [activeMenu, setActiveMenu] = useState(false);
     return (
         <div className="hamburger-menu">

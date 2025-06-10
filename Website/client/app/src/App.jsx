@@ -12,7 +12,6 @@ function App() {
   const [usernames, setUsernames] = useState([]);
   const [user, setUser] = useState("");
   const [email, setEmail] = useState("");
-  const [newTitle, setNewTitle] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [time, setTime] = useState('');
 
