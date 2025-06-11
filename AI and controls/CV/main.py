@@ -1,6 +1,7 @@
 import cv2 as cv
 import cv2.aruco as aruco
 import time
+from cv2.gapi import threshold
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -10,6 +11,7 @@ img = cv.imread("Media/track.jpg")
 
 def aruco_detect(img, aruco_mark_type):
     img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+    img = cv.GaussianBlur(img, (5, 5), 0)
     aruco_dict = aruco.getPredefinedDictionary(aruco_mark_type)
     parameters = cv.aruco.DetectorParameters()
     detector = cv.aruco.ArucoDetector(aruco_dict, parameters)
@@ -69,19 +71,29 @@ def get_finishline(img):
 
 
 def live_feed():
-    video = cv.VideoCapture("http://192.168.10.55:8080/video")
-    backSub = cv.createBackgroundSubtractorMOG2()
+    video = cv.VideoCapture("https://192.168.130.102:8080/video")
     while True:
         timer = time.time()
         ret, frame = video.read()
-        aruco_mask = aruco_detect(frame, aruco.DICT_4X4_250)
-        cv.imshow("Aruco Mask", aruco_mask)
-        print("Aruco Mask Time:", time.time() - timer)
+        gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+        equalized = cv.equalizeHist(gray)
+        blur = cv.GaussianBlur(equalized, (21, 21), 0)
+        thresh = cv.adaptiveThreshold(
+            blur, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 2
+        )
+        edges = cv.Canny(thresh, 50, 150, apertureSize=3)
+        contours, _ = cv.findContours(edges, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+        cv.drawContours(frame, contours, -1, (0, 255, 0), 2)
+        print(time.time() - timer)
+        cv.imshow("Contours", frame)
 
+        if ret:
+            pass
         if cv.waitKey(1) == ord("q"):
             break
 
 
-get_track_mask(img)
-get_finishline(img)
+checkpoints = []
+track = cv.imread("Track data/track_mask.jpg", cv.IMREAD_GRAYSCALE)
+finish_line = cv.imread("Track data/finishline_mask.jpg", cv.IMREAD_GRAYSCALE)
 live_feed()
