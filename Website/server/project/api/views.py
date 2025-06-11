@@ -20,6 +20,19 @@ def create_usernames(request):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST'])
+def create_multiple_usernames(request):
+    if not isinstance(request.data, list):
+        return Response({"error": "Expected a list of usernames."}, status=status.HTTP_400_BAD_REQUEST)
+
+    serializer = UsernameSerializer(data=request.data, many=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    print("Virheet:", serializer.errors)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 @api_view(['PUT', 'DELETE'])
 
 def usernames_detail(request, pk):
@@ -46,7 +59,7 @@ def update_user(request, pk):
     except Username.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
     
-    serializer = UsernameSerializer(user, data=request.data, partial=true)
+    serializer = UsernameSerializer(user, data=request.data, partial=True)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data)

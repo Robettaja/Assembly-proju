@@ -12,6 +12,8 @@ function App() {
   const [usernames, setUsernames] = useState([]);
   const [user, setUser] = useState("");
   const [email, setEmail] = useState("");
+  const [username1, setUsername1] = useState("");
+  const [username2, setUsername2] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [time, setTime] = useState('');
 
@@ -38,31 +40,36 @@ function App() {
     }
   };
 
-  const addUser = async () => {
-    console.log("adduser called")
-    const userData = {
-      user: user,
-      email: email,
-    };
+  const addUser = async (users) => {
+    if (users.lenghth === 0) {
+      console.warn("No users to add");
+      return;
+    }
+    
 
     try {
-    
-      const response = await fetch("http://127.0.0.1:8000/api/usernames/create/", {
+      
+      const response = await fetch("http://127.0.0.1:8000/api/usernames/create-multiple/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(userData),
-
+        body: JSON.stringify(users),
       });
-      const data = await response.json();
-      setUsernames((prev) => [...prev, data]);
-      setLastUserId(data.id);
-      console.log(data);
-    }
-     catch (err) {
-        console.log(err);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Backend error:", response.status, errorText);
+        return;
       }
+
+      const data = await response.json();
+      setUsernames((prev) => [...prev, ...data]);
+      console.log("Usernames added:", data);
+
+    } catch (err) {
+      console.log("Fetch error:", err);
+    }
     
   };
 
@@ -86,7 +93,12 @@ function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await addUser();
+
+    const usersToAdd = [];
+    if (username1.trim() !== "") usersToAdd.push({ user: username1 }); 
+    if (username2.trim() !== "") usersToAdd.push({ user: username2 }); 
+    
+    await addUser(usersToAdd);
     setSubmitted(true);
     const now = new Date();
     const formattedTime = now.toLocaleDateString();
@@ -235,8 +247,6 @@ function App() {
           
         <div>
 
-  <>
-
 
 
       <div>
@@ -244,33 +254,42 @@ function App() {
         <p>Enter your username and email to race</p>
       </div>
 
-      <div className="input-container">
+      <div className = "input-form">
         {!submitted ? (
-          <div className="view">
-            <form onSubmit={handleSubmit}>
+          <form onSubmit = {handleSubmit}>
+            <h2>Input usernames</h2>
+            <div className="input-container">
               <label>
-                Username:
+                Player 1:
                 <input
-                  type="text"
-                  value={user}
-                  onChange={(e) => setUser(e.target.value)}
+                  type ="text"
+                  value={username1}
+                  onChange={(e) => setUsername1(e.target.value)}
                   required
                 />
               </label>
+            </div>
+            
+            <div className="input-container">
               <label>
-                Email:
+                Player 2:
                 <input
-                  type="text"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
+                  type ="text"
+                  value={username2}
+                  onChange={(e) => setUsername2(e.target.value)}
+                  required
+                  />
               </label>
-              <button type="submit">Lähetä</button>
-            </form>
-          </div>
+            </div>
+
+            <button type="submit">Start race</button>
+          </form>
+
         ) : (
-          <>
-            <div className="view">
+          
+          <div className= "display-container">
+            <h2>Race</h2>
+
               <button onClick={() => {
                 setSubmitted(false)
                 setUser("");
@@ -278,23 +297,22 @@ function App() {
               }} id="back-arrow">
                 <VscArrowLeft />
               </button>
-              <h1>Hei, {user}!</h1>
-              <p>Nykyinen aika on: </p>
-              <div className="stopwatch">
-                <div className="display">{formatTime()}</div>
-                <div className="controls">
-                  <button onClick={start} className="start-button">Start</button>
-                  <button onClick={stop} className="stop-button">Stop</button>
-                  <button onClick={reset} className="reset-button">Reset</button>
-                </div>
-              </div>
+
+            <div className="username-box">
+              <p>{username1}</p>
             </div>
 
-            
-          </>
+           <div className="username-box">
+              <p>{username2}</p>
+            </div>
+
+          </div>
+        
         )}
       </div>
-    </>
+
+ 
+        
       <div className="footer">
         <p>© 2023 Racetrack. All rights reserved.</p>
       </div>
