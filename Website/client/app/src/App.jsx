@@ -142,7 +142,7 @@ function App() {
             method: "PUT",
             headers: {
               "Content-Type": "application/json"},
-            body: JSON.stringify({laptime: lapTime, user, email }),
+            body: JSON.stringify({laptime: lapTime, user }),
           });
           fetchUsernames(); // Refresh the list of usernames
         }
@@ -288,22 +288,31 @@ function App() {
         ) : (
           
           <div className= "display-container">
+            <div className="display">{formatTime()}</div>
             <h2>Race</h2>
 
               <button onClick={() => {
                 setSubmitted(false)
                 setUser("");
-                setEmail("");
+              
               }} id="back-arrow">
                 <VscArrowLeft />
               </button>
 
             <div className="username-box">
               <p>{username1}</p>
+              <div>
+                <button onClick={start} className="start-button">Start</button>
+                <button onClick={stop} className="stop-button">Stop</button>
+              </div>
             </div>
 
            <div className="username-box">
               <p>{username2}</p>
+              <div>
+                <button onClick={start} className="start-button">Start</button>
+                <button onClick={stop} className="stop-button">Stop</button>
+              </div>
             </div>
 
           </div>

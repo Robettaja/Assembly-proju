@@ -116,18 +116,26 @@ h1 {
 }
 
 
-.view {
+.input-form {
   display: flex;
   position: relative;
   flex-direction: column;
   gap: 1em;
   max-width: 600px;
-  width: 100%;
+  
   background-color: white;
   border: black 2px solid;
   border-radius: 15px;
   margin: 0 auto;
   padding: 1em; 
+}
+
+.input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  border: solid 1px #ccc;
+  border-radius: 8px;
 }
 
 #back-arrow {
@@ -136,6 +144,12 @@ h1 {
   background-color: transparent;
   color: black;
   border: 0;
+}
+
+.username-box {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
 }
 
 #back-arrow:hover {
