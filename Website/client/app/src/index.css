@@ -138,6 +138,24 @@ h1 {
   border-radius: 8px;
 }
 
+.display-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  max-width: 1000px;
+  background-color: white;
+  border-radius: 15px;
+  margin: 0 auto;
+  padding: 1em; 
+}
+
+.display-container h2 {
+  font-size: 2em;
+  line-height: 1.1;
+  color: black;
+  padding: 50px;  
+}
+
 #back-arrow {
   position: absolute;
   right: 5px;
@@ -146,10 +164,35 @@ h1 {
   border: 0;
 }
 
+.username-container {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+  max-width: 600px;
+  background-color: rgb(150, 93, 93);
+  border-radius: 15px;
+  margin: 0 auto;
+  padding: 1em; 
+}
+
 .username-box {
   display: flex;
   flex-direction: column;
   padding: 20px;
+}
+
+.username-box h2 {
+  font-size: 50px;
+  font-weight: 500;
+  color: black;
+}
+
+.laps {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  max-width: 600px;
+  
 }
 
 #back-arrow:hover {

@@ -16,7 +16,9 @@ function App() {
   const [username2, setUsername2] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [time, setTime] = useState('');
-
+  const [laps1, setLaps1] = useState([]);
+  const [laps2, setLaps2] = useState([]);
+  const [userIds, setUserIds] = useState([]);
   const [isRunning, setIsRunning] = useState(false);
   const [laps, setLaps] = useState([]);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -66,6 +68,7 @@ function App() {
       const data = await response.json();
       setUsernames((prev) => [...prev, ...data]);
       console.log("Usernames added:", data);
+      return data;
 
     } catch (err) {
       console.log("Fetch error:", err);
@@ -97,8 +100,11 @@ function App() {
     const usersToAdd = [];
     if (username1.trim() !== "") usersToAdd.push({ user: username1 }); 
     if (username2.trim() !== "") usersToAdd.push({ user: username2 }); 
-    
-    await addUser(usersToAdd);
+
+    const addedUsers = await addUser(usersToAdd);
+    if (addedUsers) {
+      setUserIds(addedUsers.map(u => u.id))
+    }
     setSubmitted(true);
     const now = new Date();
     const formattedTime = now.toLocaleDateString();
@@ -147,13 +153,15 @@ function App() {
           fetchUsernames(); // Refresh the list of usernames
         }
 
-        reset();
+        
       };
   
       function reset(){
 
         setElapsedTime(0);
         setIsRunning(false);  
+        setLaps1([]);
+        setLaps2([]);
       }
   
       function formatTime(){
@@ -170,6 +178,62 @@ function App() {
         return `${hours}:${minutes}:${seconds}:${milliseconds}`;
   
       }
+
+      const handleLap1 = () => {
+        if (laps1.length < 3) setLaps1([...laps1, formatTime()]);
+      };
+
+      const handleLap2 = () => {
+        if (laps2.length < 3) setLaps2([...laps2, formatTime()]);
+      };
+
+      const totalTime = (laps) => {
+        const toMs = (str) => {
+          const [h, m, s, ms] = str.split(":").map(Number);
+          return h * 3600000 + m * 60000 + s * 1000 + ms * 10;
+        };
+
+        const sum = laps.reduce((acc, lap) => acc + toMs(lap), 0);
+        if (laps. length === 3) {
+          let hours = Math.floor(sum / (1000 * 60 * 60));
+          let minutes = Math.floor((sum / (1000 * 60)) % 60);
+          let seconds = Math.floor((sum / 1000) % 60);
+          let milliseconds = Math.floor((sum % 1000) / 10);
+          hours = String(hours).padStart(2, "0");
+          minutes = String(minutes).padStart(2, "0");
+          seconds = String(seconds).padStart(2, "0");
+          milliseconds = String(milliseconds).padStart(2, "0");
+          return `${hours}:${minutes}:${seconds}:${milliseconds}`;
+          }
+          return "";
+        };
+
+
+  useEffect(() => {
+    if (laps1.length === 3 && userIds[0]) {
+      const total = totalTime(laps1);
+      fetch(`http://127.0.0.1:8000/api/usernames/${userIds[0]}/`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ laptime: total }),
+      }).then(fetchUsernames);
+    }
+  }, [laps1, userIds]);
+  
+  useEffect(() => {
+    if (laps2.length === 3 && userIds[1]) {
+      const total = totalTime(laps2);
+      fetch(`http://127.0.0.1:8000/api/usernames/${userIds[1]}/`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ laptime: total }),
+      }).then(fetchUsernames);
+      }
+  }, [laps2, userIds]);
 
   return (
     
@@ -251,7 +315,7 @@ function App() {
 
       <div>
         <h1>Racetrack</h1>
-        <p>Enter your username and email to race</p>
+        <p>Enter your usernames to race</p>
       </div>
 
       <div className = "input-form">
@@ -294,27 +358,59 @@ function App() {
               <button onClick={() => {
                 setSubmitted(false)
                 setUser("");
+                reset();
               
               }} id="back-arrow">
                 <VscArrowLeft />
               </button>
+              <div className = "username-container">
+                <div className="username-box">
+                  <h2>{username1}</h2>
+                  <div className="laps">
+                    <p>lap1: {laps1[0] || ""}
+                      <button className="button-lap" onClick={handleLap1} disabled = {laps1.length >= 3}>Lap</button>
+                      </p> 
+                    <p>lap2: {laps1[1] || ""}
+                      <button className="button-lap" onClick={handleLap1} disabled = {laps1.length >= 3}>Lap</button>
+                      </p> 
+                    <p>lap3: {laps1[2] || ""}
+                      <button className="button-lap" onClick={handleLap1} disabled = {laps1.length >= 3}>Lap</button>
+                      </p> 
+                    <p>Total: {totalTime(laps1)} 
+                    </p>
 
-            <div className="username-box">
-              <p>{username1}</p>
-              <div>
-                <button onClick={start} className="start-button">Start</button>
-                <button onClick={stop} className="stop-button">Stop</button>
-              </div>
-            </div>
+                  </div>
+                  <div>
+                    <button onClick={start} className="start-button">Start</button>
+                    <button onClick={stop} className="stop-button">Stop</button>
+                  </div>
+                </div>
 
-           <div className="username-box">
-              <p>{username2}</p>
-              <div>
-                <button onClick={start} className="start-button">Start</button>
-                <button onClick={stop} className="stop-button">Stop</button>
-              </div>
-            </div>
+                <div className="username-box">
+                  <h2>{username2}</h2>
+                  <div className="laps">
+                    <p>lap1: {laps2[0] || ""}
+                      <button className="button-lap" onClick={handleLap2} disabled = {laps2.length >= 3}>Lap</button>
+                      </p> 
+                    <p>lap2: {laps2[1] || ""}
+                      <button className="button-lap" onClick={handleLap2} disabled = {laps2.length >= 3}>Lap</button>
+                      </p> 
+                    <p>lap3: {laps2[2] || ""}
+                      <button className="button-lap" onClick={handleLap2} disabled = {laps2.length >= 3}>Lap</button>
+                      </p> 
+                    <p>Total: {totalTime(laps2)}
+                    </p>
 
+
+                  </div>
+
+                    
+                    <div>
+                      <button onClick={start} className="start-button">Start</button>
+                      <button onClick={stop} className="stop-button">Stop</button>
+                    </div>
+                  </div>
+              </div>  
           </div>
         
         )}
