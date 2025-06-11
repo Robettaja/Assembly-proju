@@ -93,8 +93,7 @@ function App() {
     setTime(formattedTime);
 
 
-    setUser("");
-    setEmail("");
+   
   } 
   
 
@@ -127,7 +126,7 @@ function App() {
         setLaps((prev) => [...prev, lapTime]);
 
         if (lastUserId) {
-          await fetch(`http:////127.0.0.1:8000/api/usernames/${lastUserId}/`, {
+          await fetch(`http://127.0.0.1:8000/api/usernames/${lastUserId}/`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json"},
@@ -272,7 +271,11 @@ function App() {
         ) : (
           <>
             <div className="view">
-              <button onClick={() => setSubmitted(false)} id="back-arrow">
+              <button onClick={() => {
+                setSubmitted(false)
+                setUser("");
+                setEmail("");
+              }} id="back-arrow">
                 <VscArrowLeft />
               </button>
               <h1>Hei, {user}!</h1>
