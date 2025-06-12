@@ -3,6 +3,7 @@ import cv2.aruco as aruco
 import time
 from cv2.gapi import threshold
 import numpy as np
+from ultralytics import YOLO
 import matplotlib.pyplot as plt
 
 
@@ -70,30 +71,35 @@ def get_finishline(img):
     cv.imwrite("Track data/finishline_mask.jpg", mask)
 
 
-def live_feed():
-    video = cv.VideoCapture("https://192.168.130.102:8080/video")
+def race_loop():
+    model = YOLO("yolov8x.pt")
+    video = cv.VideoCapture("https://192.168.129.151:8080/video")
+    race_mask = cv.imread("Track data/track_mask.jpg", cv.IMREAD_GRAYSCALE)
+    finnish_line_mask = cv.imread("Track data/finishline_mask.jpg", cv.IMREAD_GRAYSCALE)
     while True:
         timer = time.time()
         ret, frame = video.read()
-        gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-        equalized = cv.equalizeHist(gray)
-        blur = cv.GaussianBlur(equalized, (21, 21), 0)
-        thresh = cv.adaptiveThreshold(
-            blur, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 2
-        )
-        edges = cv.Canny(thresh, 50, 150, apertureSize=3)
-        contours, _ = cv.findContours(edges, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-        cv.drawContours(frame, contours, -1, (0, 255, 0), 2)
-        print(time.time() - timer)
-        cv.imshow("Contours", frame)
 
-        if ret:
-            pass
-        if cv.waitKey(1) == ord("q"):
+        if not ret:
+            print("Error: Can't receive frame. Exiting...")
+            break
+
+        # Run YOLOv8 detection
+        results = model(frame)
+
+        # Draw results on frame
+        annotated_frame = results[0].plot()
+
+        # Show the frame
+        cv.imshow("YOLOv8 Live Detection", annotated_frame)
+
+        # Break the loop on 'q' key press
+        if cv.waitKey(1) & 0xFF == ord("q"):
             break
 
 
 checkpoints = []
+
 track = cv.imread("Track data/track_mask.jpg", cv.IMREAD_GRAYSCALE)
 finish_line = cv.imread("Track data/finishline_mask.jpg", cv.IMREAD_GRAYSCALE)
-live_feed()
+race_loop()
