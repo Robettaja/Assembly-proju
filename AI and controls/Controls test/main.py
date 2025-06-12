@@ -68,7 +68,7 @@ try:
             targetX = user.controller.get_axis(2) * user.speed
             targetY = -user.controller.get_axis(1) * user.speed
             currentX = move_towards_target(currentX, targetX, 2, dt)
-            currentY = move_towards_target(currentY, targetX, 2, dt)
+            currentY = move_towards_target(currentY, targetX, 0.01, dt)
             if user.ip != "0.0.0.0":
                 data = struct.pack("ff", currentY, currentX)
                 if data:
