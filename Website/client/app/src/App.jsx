@@ -3,6 +3,7 @@ import './App.css'
 import { VscChromeClose } from "react-icons/vsc";
 import { VscArrowLeft } from "react-icons/vsc";
 import Users from './pages/Users';
+import Leaderboard from './pages/leaderboard';
 
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
@@ -283,6 +284,7 @@ function App() {
               <ul>
                       <li><Link to="/">Home</Link></li>
                       <li><Link to ="/users">Users</Link></li>
+                      <li><Link to="/leaderboard">Leaderboard</Link></li>
               </ul>
 
             <button
@@ -432,6 +434,10 @@ function App() {
             usernames = {usernames}
             deleteUser={deleteUser}
             />
+        } />
+
+        <Route path="/leaderboard" element={
+          <Leaderboard usernames = {usernames} />
         } />
 
       </Routes>
