@@ -331,7 +331,7 @@ function App() {
                 </div>
                 </div>
                 <div className="button-row">
-                <button type="submit" className="w-300 h-300 bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-12 rounded-lg text-2xl uppercase tracking-wider transition-colors duration-300 transform hover:scale-105 shadow-lg">Start race</button>
+                <button type="submit">Start race</button>
                 </div>
                 <div className = "Hamk-logo-container">
                     <img src="/images/HAMK_Logo_horizontal_NEGA.png" alt="Hamk Logo"/>
@@ -410,8 +410,8 @@ function App() {
 
  
         
-      <div className="footer">
-        <p>© 2023 Racetrack. All rights reserved.</p>
+      <div className="footer absolute bottom-0 left-0 w-full p-4 text-center text-gray-400 text-sm z-20">
+        <p>© 2025 Saija Joronen. All rights reserved.</p>
       </div>
     
     

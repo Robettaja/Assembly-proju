@@ -266,6 +266,8 @@ input {
 .Hamk-logo-container img {
   width: 100px;
   color: white;
+  display: flex;
+  justify-content: center;
 }
 
 .display-container {
