@@ -274,35 +274,37 @@ function App() {
 
 
 */}    
+<div className = "App">
   <Router>
     <div>
         <div className="nav-bar">
-            
-            <div className={`${activeMenu ? "right-0" : "right-[400px]"}
-              } h-screen w-full max-w-[400px] bg-zinc-800 absolute top-0 duration-500`}
-              >
-              <ul>
-                      <li><Link to="/">Home</Link></li>
-                      <li><Link to ="/users">Users</Link></li>
-                      <li><Link to="/leaderboard">Leaderboard</Link></li>
-              </ul>
-
-            <button
+          <button
               onClick={() => {
                 setActiveMenu(!activeMenu);
               }}
               className={`hamburger-menu ${activeMenu && "active"}`}
                   
               >
-                  <span className="bar"></span>
-                  <span className="bar"></span>
-                  <span className="bar"></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
             </button>
 
             
+            <div className={`${activeMenu ? "right-0" : "right-full"}
+               h-screen w-full max-w-[400px] bg-zinc-800 absolute top-0 duration-500`}
+              >
+               <ul>
+                      <li><Link to="/">Home</Link></li>
+                      <li><Link to ="/users">Users</Link></li>
+                      <li><Link to="/leaderboard">Leaderboard</Link></li>
+              </ul>
+            
+            
               {activeMenu && (
                   <div className="menu">
-                    
+                     
+
                   </div>
               )}
               </div>
@@ -314,43 +316,54 @@ function App() {
         <div>
 
 
+      <div className="video-background-container">
+        <video autoPlay muted loop playsInline className="background-video">
+          <source src="/videos/driftingcar.mp4" type= "video/mp4"/>
+        </video>
 
-      <div>
-        <h1>Racetrack</h1>
-        <p>Enter your usernames to race</p>
-      </div>
 
-      <div className = "input-form">
-        {!submitted ? (
-          <form onSubmit = {handleSubmit}>
-            <h2>Input usernames</h2>
-            <div className="input-container">
-              <label>
-                Player 1:
-                <input
-                  type ="text"
-                  value={username1}
-                  onChange={(e) => setUsername1(e.target.value)}
-                  required
-                />
-              </label>
-            </div>
+      <div className = "race">
+          <h2>Race</h2>
+          {!submitted ? (
+            <div className="input-form">
+              
+              <form onSubmit = {handleSubmit}>
+             
+              <div className="input-row">
+                <div className="input-container">
+                  <label>
+                    <p>Player 1:</p>
+                    <input
+                      type ="text"
+                      value={username1}
+                      onChange={(e) => setUsername1(e.target.value)}
+                      required
+                    />
+                  </label>
+                </div>
+                
+                <div className="input-container">
+                  <label>
+                    <p>Player 2:</p>
+                    <input
+                      type ="text"
+                      value={username2}
+                      onChange={(e) => setUsername2(e.target.value)}
+                      required
+                      />
+                  </label>
+                </div>
+                </div>
+                <div className="button-row">
+                <button type="submit">Start race</button>
+                </div>
+                <div className = "Hamk-logo-container">
+                    <img src="/images/HAMK_Logo_horizontal_NEGA.png" alt="Hamk Logo"/>
+                </div>
+            </form>
             
-            <div className="input-container">
-              <label>
-                Player 2:
-                <input
-                  type ="text"
-                  value={username2}
-                  onChange={(e) => setUsername2(e.target.value)}
-                  required
-                  />
-              </label>
-            </div>
-
-            <button type="submit">Start race</button>
-          </form>
-
+          </div>
+          
         ) : (
           
           <div className= "display-container">
@@ -417,6 +430,7 @@ function App() {
         
         )}
       </div>
+      </div>
 
  
         
@@ -445,7 +459,7 @@ function App() {
   </div>
 
 </Router>
-
+</div>
 </>
   );
 }

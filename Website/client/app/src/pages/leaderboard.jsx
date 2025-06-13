@@ -24,7 +24,7 @@ const Leaderboard = ({usernames}) => {
                 </thead>
                 <tbody>
                     {sorted.length > 0 ? (
-                        sorted.map((user, index) => (
+                        sorted.slice(0,10).map((user, index) => (
                         <tr key={user.id}>
                             <td>{index + 1}</td>
                             <td>{user.user}</td>

@@ -1,7 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
+  flex-grow: 1;
 
   color-scheme: light dark;
   color: rgba(0, 0, 0, 0.87);
@@ -11,6 +16,27 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0; 
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.App {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
 }
 
 a {
@@ -23,31 +49,64 @@ a:hover {
 }
 
 body {
-  margin: 0;
+
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
   display: flex;
   place-items: center;
-  min-width: 500px;
+  min-width: 100vw;
   min-height: 100vh;
+  max-height: 300xp;
   
 }
 
-.nav-bar
-{
+.nav-bar {
   display: flex;
-  justify-content: space-between;
-  align-items: right;
-  position: fixed;
+  justify-content: flex-end;
+  align-items: center;
   top: 50px;
-  left: 20px;
-  width: 100%;
+  right: 20px;
   padding: 10px;
-
+  z-index: 10;
   color: white;
+}
+
+.nav-bar > div:last-child {
+  z-index: 9;
+}
+
+.menu {
+  background-color: black;
+  
+}
+
+.nav-bar ul {
+  list-style: none;
+  padding: 20px;
+  margin-top: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  color: white;
+}
+
+.nav-bar ul li a {
+  color: white;
+  text-decoration: none;
+  font-size: 1.2em;
+  padding: 10px 0;
+  display: block;
+}
+
+.nav-bar ul li a:hover {
+  color: black;
 }
 
 .nav-bar button {
   background-color: transparent;
   border:none;
+  z-index: 1;
 }
 
 
@@ -110,32 +169,84 @@ body {
   width: 50%;
 }
 
+.video-background-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.background-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+}
+
 h1 {
   font-size: 4em;
   line-height: 1.1;
 }
 
 
-.input-form {
-  display: flex;
+form {
   position: relative;
+  z-index: 1;
+  color: white;
+  display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: 1em;
-  max-width: 600px;
-  
-  background-color: white;
-  border: black 2px solid;
-  border-radius: 15px;
   margin: 0 auto;
-  padding: 1em; 
+  padding: 1em;
+  height: 500px;
+  background-position: center;
+  background-size: center;
 }
 
+.input-row {
+  display: flex;
+  flex-direction: row;
+}
 .input-container {
   display: flex;
   flex-direction: column;
+  height: 200px;
+  padding: 20px;
   gap: 1em;
-  border: solid 1px #ccc;
-  border-radius: 8px;
+
+}
+
+label {
+
+  font-size: 30px;
+}
+
+label .p {
+  padding: 20px;
+}
+
+input {
+  width: 100%;
+  height: 20px;
+}
+
+.button-row {
+  text-align: center;
+}
+
+.button-row button {
+  height: 50px;
+  width: 100px;
+  flex-direction: row;
+}
+
+.Hamk-logo-container img {
+  width: 100px;
+  color: white;
 }
 
 .display-container {
