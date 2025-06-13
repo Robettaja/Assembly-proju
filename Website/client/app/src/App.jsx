@@ -242,39 +242,15 @@ function App() {
 
 
 
-      {/*
-
-```
-      <h1> Auto kilpailu </h1>
-      <div class = "input-container">
-        <input type="text" placeholder="Input your username" 
-        onChange = {(e) => setUser(e.target.value)}
-        />
-        <input type="text" placeholder="Input your email (optional)"
-        onChange = {(e) => setEmail(e.target.value)}
-        />
-        <button onClick = {addUser}> Submit </button>
-      </div>
-      {usernames.map((username) => 
-      <div> 
-        <p>Username: {username.user} </p> 
-        <p>Email: {username.email} </p>  
-        <input type ="text" placeholder="New title..." value={newTitle[username.id] || ""}
-        onChange = {(e) => 
-          setNewTitle((prev) => ( {
-            ...prev, [username.id]: e.target.value
-          }))
-         }
-        />
-        <button onClick={ () => updateTitle(username.id, username.email)}>Change</button>
-        <button onClick={() => deleteUser(username.id)}> DELETE </button>
-        </div>
-      )}
 
 
 
-*/}    
+ 
 <div className = "App">
+  <div className="video-background-container1">
+        <video autoPlay muted loop playsInline className= "background-video blur-sm w-100">
+          <source src="/videos/driftingcar.mp4" type= "video/mp4"/>
+        </video>
   <Router>
     <div>
         <div className="nav-bar">
@@ -317,22 +293,22 @@ function App() {
 
 
       <div className="video-background-container">
-        <video autoPlay muted loop playsInline className="background-video">
+        <video autoPlay muted loop playsInline className="background-video top-50px">
           <source src="/videos/driftingcar.mp4" type= "video/mp4"/>
         </video>
 
 
       <div className = "race">
-          <h2>Race</h2>
+      
           {!submitted ? (
             <div className="input-form">
               
               <form onSubmit = {handleSubmit}>
              
-              <div className="input-row">
+              <div className="flex flex-col md:flex-row gap-8 items-center justify-center w-full">
                 <div className="input-container">
                   <label>
-                    <p>Player 1:</p>
+                    <p className="font-bold uppercase ">Player 1:</p>
                     <input
                       type ="text"
                       value={username1}
@@ -344,7 +320,7 @@ function App() {
                 
                 <div className="input-container">
                   <label>
-                    <p>Player 2:</p>
+                    <p className="font-bold uppercase ">Player 2:</p>
                     <input
                       type ="text"
                       value={username2}
@@ -355,7 +331,7 @@ function App() {
                 </div>
                 </div>
                 <div className="button-row">
-                <button type="submit">Start race</button>
+                <button type="submit" className="w-300 h-300 bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-12 rounded-lg text-2xl uppercase tracking-wider transition-colors duration-300 transform hover:scale-105 shadow-lg">Start race</button>
                 </div>
                 <div className = "Hamk-logo-container">
                     <img src="/images/HAMK_Logo_horizontal_NEGA.png" alt="Hamk Logo"/>
@@ -459,6 +435,7 @@ function App() {
   </div>
 
 </Router>
+</div>
 </div>
 </>
   );
