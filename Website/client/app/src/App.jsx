@@ -331,7 +331,13 @@ function App() {
                 </div>
                 </div>
                 <div className="button-row">
-                <button type="submit">Start race</button>
+                <button type="submit">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  Start race
+                </button>
                 </div>
                 <div className = "Hamk-logo-container">
                     <img src="/images/HAMK_Logo_horizontal_NEGA.png" alt="Hamk Logo"/>
