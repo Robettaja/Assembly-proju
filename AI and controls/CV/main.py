@@ -6,7 +6,6 @@ import numpy as np
 from ultralytics import YOLO
 import matplotlib.pyplot as plt
 
-
 img = cv.imread("Media/track.jpg")
 
 
@@ -42,9 +41,11 @@ def get_track_mask(image):
     parent_contour = sorted_contours[0]
     mask = np.zeros(image.shape, dtype=np.uint8)
 
-    cv.drawContours(mask, [parent_contour], -1, (255, 255, 255), thickness=cv.FILLED)
-    cv.drawContours(mask, [sorted_contours[2]], -1, (0, 0, 0), thickness=cv.FILLED)
-    cv.imwrite("Track data/track_mask.jpg", mask)
+    cv.drawContours(
+        mask, [sorted_contours[1]], -1, (255, 255, 255), thickness=cv.FILLED
+    )
+    # cv.drawContours(mask, [sorted_contours[2]], -1, (0, 0, 0), thickness=cv.FILLED)
+    cv.imshow("Track Mask", mask)
 
 
 def get_finishline(img):
@@ -72,34 +73,14 @@ def get_finishline(img):
 
 
 def race_loop():
-    model = YOLO("yolov8x.pt")
-    video = cv.VideoCapture("https://192.168.129.151:8080/video")
-    race_mask = cv.imread("Track data/track_mask.jpg", cv.IMREAD_GRAYSCALE)
-    finnish_line_mask = cv.imread("Track data/finishline_mask.jpg", cv.IMREAD_GRAYSCALE)
-    while True:
-        timer = time.time()
-        ret, frame = video.read()
-
-        if not ret:
-            print("Error: Can't receive frame. Exiting...")
-            break
-
-        # Run YOLOv8 detection
-        results = model(frame)
-
-        # Draw results on frame
-        annotated_frame = results[0].plot()
-
-        # Show the frame
-        cv.imshow("YOLOv8 Live Detection", annotated_frame)
-
-        # Break the loop on 'q' key press
-        if cv.waitKey(1) & 0xFF == ord("q"):
-            break
+    img = cv.imread("Media/track.jpg")
+    img = cv.resize(img, (640, 480))
+    # video = cv.VideoCapture("https://192.168.129.151:8080/video")
+    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+    blur = cv.GaussianBlur(gray, (5, 5), 0)
+    thresh = cv.threshold(blur, 140, 255, cv.THRESH_BINARY)[1]
+    cv.imshow("Edges", thresh)
+    cv.waitKey(0)
 
 
-checkpoints = []
-
-track = cv.imread("Track data/track_mask.jpg", cv.IMREAD_GRAYSCALE)
-finish_line = cv.imread("Track data/finishline_mask.jpg", cv.IMREAD_GRAYSCALE)
 race_loop()
