@@ -34,9 +34,14 @@ html, body, #root {
 .App {
   flex: 1;
   display: flex;
+  z-index: 10;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
   height: 100%;
-  width: 100%;
+  width: 100vw;
+  margin: 0;
 }
 
 a {
@@ -57,7 +62,7 @@ body {
   place-items: center;
   min-width: 100vw;
   min-height: 100vh;
-  max-height: 300xp;
+  max-height: 300px;
   
 }
 
@@ -65,8 +70,6 @@ body {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  top: 50px;
-  right: 20px;
   padding: 10px;
   z-index: 10;
   color: white;
@@ -108,7 +111,8 @@ body {
 .nav-bar button {
   background-color: transparent;
   border:none;
-  z-index: 50;
+  z-index: 10;
+
 }
 
 
@@ -173,47 +177,63 @@ body {
 }
 
 .video-background-container1 {
-  position: relative;
+  position: fixed;
   display: flex;
   top: 0;
-  width: 100%;
-  height: 1000px;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   overflow: hidden;
+  z-index: -1;
   justify-content: center;
+  align-items: center;
+
 }
+
+
 
 .video-background-container {
   position: relative;
-  top: 50px;
+  top: 0;
   width: 100%;
   height: 100%;
   overflow: hidden;
 }
 
-.background-video {
+.background-video, 
+.background-video-blur {
   position: absolute;
   display: flex;
   justify-content: center;
+  top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   object-fit: cover;
-  z-index: -1;
+  z-index: -2;
+  pointer-events: none;
 }
+
+
 
 h1 {
   font-size: 4em;
   line-height: 1.1;
 }
 
+.input-form {
+  position: relative;
+  z-index: 10;
+}
+
 
 form {
   position: relative;
-  z-index: 1;
   color: white;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
   gap: 1em;
   margin: 0 auto;
   padding: 1em;
@@ -222,10 +242,7 @@ form {
   background-size: center;
 }
 
-.input-row {
-  display: flex;
-  flex-direction: row;
-}
+
 .input-container {
   display: flex;
   justify-content: center;
@@ -253,9 +270,6 @@ input {
   width: 100%;
   height: 20px;
 }
-
-
-
 
 .button-row button {
   background: linear-gradient(-30deg, #3d0b0b 50%, #2b0808 50%);

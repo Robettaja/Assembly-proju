@@ -4,6 +4,7 @@ import { VscChromeClose } from "react-icons/vsc";
 import { VscArrowLeft } from "react-icons/vsc";
 import Users from './pages/Users';
 import Leaderboard from './pages/leaderboard';
+import Countdown from './components/countdown'
 
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
@@ -44,7 +45,7 @@ function App() {
   };
 
   const addUser = async (users) => {
-    if (users.lenghth === 0) {
+    if (users.length === 0) {
       console.warn("No users to add");
       return;
     }
@@ -248,7 +249,7 @@ function App() {
  
 <div className = "App">
   <div className="video-background-container1">
-        <video autoPlay muted loop playsInline className= "background-video blur-sm w-100">
+        <video autoPlay muted loop playsInline className= "background-video-blur blur-sm w-100">
           <source src="/videos/driftingcar.mp4" type= "video/mp4"/>
         </video>
   <Router>
@@ -293,7 +294,7 @@ function App() {
 
 
       <div className="video-background-container">
-        <video autoPlay muted loop playsInline className="background-video top-50px">
+        <video autoPlay muted loop playsInline className="background-video">
           <source src="/videos/driftingcar.mp4" type= "video/mp4"/>
         </video>
 
@@ -349,6 +350,9 @@ function App() {
         ) : (
           
           <div className= "display-container">
+            <div>
+              <Countdown/>
+              </div>
             <div className="display">{formatTime()}</div>
             <h2>Race</h2>
 
@@ -377,10 +381,7 @@ function App() {
                     </p>
 
                   </div>
-                  <div>
-                    <button onClick={start} className="start-button">Start</button>
-                    <button onClick={stop} className="stop-button">Stop</button>
-                  </div>
+                 
                 </div>
 
                 <div className="username-box">
@@ -402,11 +403,12 @@ function App() {
                   </div>
 
                     
+                  
+                  </div>
                     <div>
                       <button onClick={start} className="start-button">Start</button>
                       <button onClick={stop} className="stop-button">Stop</button>
                     </div>
-                  </div>
               </div>  
           </div>
         
