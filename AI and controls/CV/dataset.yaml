@@ -1,0 +1,7 @@
+path: D:\GitHub\Assembly-proju\AI and controls\CV\data
+
+train: images/train
+val: images/val
+
+names:
+  0: PS3 controller
