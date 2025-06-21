@@ -5,6 +5,7 @@ from cv2.gapi import threshold
 import numpy as np
 from ultralytics import YOLO
 import matplotlib.pyplot as plt
+from defisheye import Defisheye
 
 img = cv.imread("Media/track.jpg")
 
@@ -29,12 +30,12 @@ def is_intersecting(mask1, mask2):
 
 
 def get_track_mask(image):
-    image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-    image = cv.GaussianBlur(image, (7, 7), 0)
-    edges = cv.Canny(image, 50, 150, apertureSize=3)
-    mask = cv.adaptiveThreshold(
-        edges, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 2
-    )
+    lower_blue = np.array([90, 45, 30])  # Lower hue, lower saturation and brightness
+    upper_blue = np.array([140, 255, 255])  # Keep upper bound wide
+    image = cv.cvtColor(image, cv.COLOR_BGR2HSV)
+    mask = cv.inRange(image, lower_blue, upper_blue)
+    dialite_kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
+    dialated_mask = cv.dilate(mask, dialite_kernel, iterations=2)
     contours, hierarchy = cv.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
 
     sorted_contours = sorted(contours, key=cv.contourArea, reverse=True)
@@ -42,10 +43,11 @@ def get_track_mask(image):
     mask = np.zeros(image.shape, dtype=np.uint8)
 
     cv.drawContours(
-        mask, [sorted_contours[1]], -1, (255, 255, 255), thickness=cv.FILLED
+        mask, [sorted_contours[0]], -1, (255, 255, 255), thickness=cv.FILLED
     )
-    # cv.drawContours(mask, [sorted_contours[2]], -1, (0, 0, 0), thickness=cv.FILLED)
-    cv.imshow("Track Mask", mask)
+    cv.drawContours(mask, [sorted_contours[2]], -1, (0, 0, 0), thickness=cv.FILLED)
+    # cv.imshow("Track Mask", mask)
+    return mask
 
 
 def get_finishline(img):
@@ -61,7 +63,6 @@ def get_finishline(img):
     mask1 = cv.inRange(img, lower_red1, upper_red1)
     mask2 = cv.inRange(img, lower_red2, upper_red2)
     red_mask = cv.bitwise_or(mask1, mask2)
-    red_mask = cv.Canny(red_mask, 50, 150, apertureSize=3)
 
     contours, _ = cv.findContours(red_mask, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     sorted_contours = sorted(contours, key=cv.contourArea, reverse=True)
@@ -69,18 +70,60 @@ def get_finishline(img):
     cv.drawContours(
         mask, [sorted_contours[0]], -1, (255, 255, 255), thickness=cv.FILLED
     )
-    cv.imwrite("Track data/finishline_mask.jpg", mask)
+    # cv.imwrite("Track data/finishline_mask.jpg", mask)
+    return mask
 
 
 def race_loop():
-    img = cv.imread("Media/track.jpg")
-    img = cv.resize(img, (640, 480))
-    # video = cv.VideoCapture("https://192.168.129.151:8080/video")
-    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-    blur = cv.GaussianBlur(gray, (5, 5), 0)
-    thresh = cv.threshold(blur, 140, 255, cv.THRESH_BINARY)[1]
-    cv.imshow("Edges", thresh)
-    cv.waitKey(0)
+    aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_APRILTAG_25H9)
+    parameters = cv.aruco.DetectorParameters()
+
+    detector = cv.aruco.ArucoDetector(aruco_dict, parameters)
+    video = cv.VideoCapture(1)
+    ret, frame = video.read()
+    last_car = np.zeros(frame.shape, dtype=np.uint8)
+
+    while True:
+        ret, frame = video.read()
+        obj = Defisheye(
+            frame,
+            format="fullframe",
+            fov=120,
+            pfov=90,
+        )
+        defished = obj.convert()
+        if not ret:
+            break
+        gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+        corners, ids, rejected = detector.detectMarkers(gray)
+
+        mask = np.zeros(frame.shape, dtype=np.uint8)
+        mask = cv.cvtColor(mask, cv.COLOR_BGR2GRAY)
+        # aruco.drawDetectedMarkers(mask, corners, ids)
+
+        if ids is not None:
+            for marker_corners in corners:
+                pts = marker_corners[0].astype(np.int32)
+                cv.fillConvexPoly(mask, pts, (255, 255, 255))
+                mask = cv.threshold(mask, 127, 255, cv.THRESH_BINARY)[1]
+        if cv.countNonZero(mask) > 0:
+            last_car = mask
+
+        cv.imshow("Frame", last_car)
+        # Exit on 'q' key press
+        if cv.waitKey(1) & 0xFF == ord("q"):
+            break
 
 
-race_loop()
+def track_test_loop():
+    video = cv.VideoCapture(1)
+    while True:
+        ret, frame = video.read()
+        line = get_finishline(frame)
+        cv.imshow("Track Mask", line)
+
+        if cv.waitKey(1) & 0xFF == ord("q"):
+            break
+
+
+track_test_loop()
