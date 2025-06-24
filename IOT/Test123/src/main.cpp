@@ -15,9 +15,14 @@ char packetBuffer[255];
 void setup()
 {
   Serial.begin(9600);
-  servo.attach(9);
   while (!Serial)
     ;
+
+  servo.attach(4);
+  pinMode(7,OUTPUT);
+  pinMode(8,OUTPUT);
+  pinMode(9,OUTPUT);
+
 
   analogWrite(LED_BUILTIN, 255);
   bool isConnected = false;
@@ -28,7 +33,9 @@ void setup()
     WiFi.begin(ssid, pass); // Start connecting to WiFi
     while (WiFi.status() != WL_CONNECTED)
     {
-      delay(500);
+      delay(700);
+
+      Serial.println(".");
     }
     if (WiFi.localIP() != "0.0.0.0")
       isConnected = true;
@@ -54,7 +61,6 @@ void loop()
     memcpy(&i0, buf, 4);
     memcpy(&i1, buf + 4, 4);
     int hForce = i1 * 255;
-    int vForce = i0 * 255;
     if (i0 > 0.05)
     {
       int rotationAmount = 98 - (i0 * 45);
@@ -71,12 +77,23 @@ void loop()
     }
     if (i1 > 0.05)
     {
+
+        analogWrite(9,hForce);
+        digitalWrite(7, HIGH);
+        digitalWrite(8, LOW);
     }
     else if (i1 < -0.05)
     {
+
+        analogWrite(9,hForce*-1);
+        digitalWrite(7, LOW);
+        digitalWrite(8, HIGH);
     }
     else
     {
+        analogWrite(9,0);
+        digitalWrite(7, LOW);
+        digitalWrite(8, LOW);
     }
   }
 }
