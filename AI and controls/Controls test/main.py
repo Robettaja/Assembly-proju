@@ -3,7 +3,9 @@ import serial
 import socket
 import struct
 import time
-from dotenv import load_dotenv
+from getip import *
+from dotenv import load_dotenv, set_key
+from zeroconf import Zeroconf, ServiceBrowser, ServiceListener
 import os
 
 
@@ -36,6 +38,9 @@ class User:
         self.is_player = is_player
         self.controller = joystick
 
+
+ip = socket.gethostbyname("car1.local")
+print("IP address:", ip)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

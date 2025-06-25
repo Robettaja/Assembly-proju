@@ -6,6 +6,8 @@ from ultralytics import YOLO
 import matplotlib.pyplot as plt
 from defisheye import Defisheye
 
+line_pos = ""
+
 
 def aruco_detect(img, aruco_mark_type):
     img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
@@ -102,6 +104,8 @@ def get_finishline(img):
     cv.drawContours(
         mask, [sorted_contours[0]], -1, (255, 255, 255), thickness=cv.FILLED
     )
+    global line_pos
+    line_pos = white_pixels_side(mask, axis="x")
     track = cv.imread("Track data/track_mask.jpg", cv.IMREAD_GRAYSCALE)
     ys, xs, _ = np.where(track == 255)
 
@@ -117,12 +121,12 @@ def get_finishline(img):
         match orientation:
             case "horizontal":
                 kernel_height = int(0.05 * h)
-                kernel_width = int(0.4 * w)
+                kernel_width = int(1920)
                 kernel = cv.getStructuringElement(
                     cv.MORPH_RECT, (kernel_width, kernel_height)
                 )
             case "vertical":
-                kernel_height = int(0.4 * h)
+                kernel_height = int(1920)
                 kernel_width = int(0.05 * w)
                 kernel = cv.getStructuringElement(
                     cv.MORPH_RECT, (kernel_width, kernel_height)
@@ -145,22 +149,25 @@ def save_checkpoints():
 
     match orientation:
         case "vertical":
-            line_location = white_pixels_side(finishline_mask, axis="y")
+            line_location = white_pixels_side(finishline_mask, axis="x")
             ys, xs, _ = np.where(finishline_mask == 255)
-            line_top_point = ys.min() if ys.size > 0 else 0
+            line_left_point = xs.min() if xs.size > 0 else 0
 
             cys, cxs, _ = np.where(track_mask == 255)
-            track_top_point = cys.min() if cys.size > 0 else 0
-            track_bottom_point = cys.max() if cys.size > 0 else 0
+            track_left_point = cxs.min() if cxs.size > 0 else 0
+            track_right_point = cxs.max() if cxs.size > 0 else 0
 
-            shift_y = 0
+            shift = 0
+            dist = 0
             match line_location:
-                case "top":
-                    shift_y = track_bottom_point - line_top_point
-                case "bottom":
-                    shift_y = -(line_top_point - track_top_point)
+                case "left":
+                    dist = abs(line_left_point - track_left_point)
+                    shift = abs(line_left_point - track_right_point) - dist
+                case "right":
+                    dist = abs(line_left_point - track_right_point)
+                    shift = -(abs(line_left_point - track_left_point)) + dist
 
-            M = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, shift_y]], dtype=np.float32)
+            M = np.array([[1.0, 0.0, shift], [0.0, 1.0, 0.0]], dtype=np.float32)
             checkpoint2 = cv.warpAffine(
                 finishline_mask, M, (finishline_mask.shape[1], finishline_mask.shape[0])
             )
@@ -172,50 +179,20 @@ def save_checkpoints():
                 (finishline_mask.shape[1], finishline_mask.shape[0]),
             )
 
-            new_shift_y = shift_y // 2
-            M_shift = np.array(
-                [[1.0, 0.0, 0.0], [0.0, 1.0, new_shift_y]], dtype=np.float32
-            )
-            rotated_mask = cv.warpAffine(
+            kernel = cv.getStructuringElement(cv.MORPH_RECT, (1920, 1))
+            rotated_mask = cv.dilate(rotated_mask, kernel, iterations=1)
+
+            ys_r, xs_r = np.where(rotated_mask == 255)
+            height = track_mask.shape[0]
+            shift = abs(ys_r.min() - (height // 2))
+
+            M_shift = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, shift]], dtype=np.float32)
+            checkpoint1 = cv.warpAffine(
                 rotated_mask, M_shift, (rotated_mask.shape[1], rotated_mask.shape[0])
             )
 
-            ys_r, xs_r = np.where(rotated_mask == 255)
-            width = xs_r.max() - xs_r.min()
-            x_offset = cxs.max() - xs_r.max() + (width // 2)
-            M1 = np.array([[1.0, 0.0, x_offset], [0.0, 1.0, 0]], dtype=np.float32)
-            checkpoint1 = cv.warpAffine(
-                rotated_mask, M1, (rotated_mask.shape[1], rotated_mask.shape[0])
-            )
-
-            x_offset = -(xs_r.min() - cxs.min() + (width // 2))
-            M3 = np.array([[1.0, 0.0, x_offset], [0.0, 1.0, 0]], dtype=np.float32)
-            checkpoint3 = cv.warpAffine(
-                rotated_mask, M3, (rotated_mask.shape[1], rotated_mask.shape[0])
-            )
-
         case "horizontal":
-            line_location = white_pixels_side(finishline_mask, axis="x")
             ys, xs, _ = np.where(finishline_mask == 255)
-            height = ys.max() - ys.min()
-            width = xs.max() - xs.min()
-            line_left_point = xs.min() if xs.size > 0 else 0
-            line_right_point = xs.max() if xs.size > 0 else 0
-
-            cys, cxs, _ = np.where(track_mask == 255)
-            track_left_point = cxs.min() if cxs.size > 0 else 0
-            track_right_point = cxs.max() if cxs.size > 0 else 0
-
-            shift_x = 0
-            match line_location:
-                case "left":
-                    shift_x = abs(track_right_point - line_left_point) - (width // 2)
-                case "right":
-                    shift_x = -(abs(track_left_point - line_left_point) + (height // 2))
-            M = np.array([[1.0, 0.0, shift_x], [0.0, 1.0, 0.0]], dtype=np.float32)
-            checkpoint2 = cv.warpAffine(
-                finishline_mask, M, (finishline_mask.shape[1], finishline_mask.shape[0])
-            )
 
             M_rot = cv.getRotationMatrix2D((int(xs.mean()), int(ys.mean())), -90, 1)
             rotated_mask = cv.warpAffine(
@@ -224,26 +201,35 @@ def save_checkpoints():
                 (finishline_mask.shape[1], finishline_mask.shape[0]),
             )
 
-            new_shift_x = shift_x // 2
-            M_shift = np.array(
-                [[1.0, 0.0, new_shift_x], [0.0, 1.0, 0.0]], dtype=np.float32
-            )
-            rotated_mask = cv.warpAffine(
-                rotated_mask, M_shift, (rotated_mask.shape[1], rotated_mask.shape[0])
-            )
+            kernel = cv.getStructuringElement(cv.MORPH_RECT, (1, 1920))
+            rotated_mask = cv.dilate(rotated_mask, kernel, iterations=1)
+            ys, xs = np.where(rotated_mask == 255)
+            line_left_point = xs.min() if xs.size > 0 else 0
+            line_right_point = xs.max() if xs.size > 0 else 0
 
-            ys_r, xs_r = np.where(rotated_mask == 255)
-            width = xs_r.max() - xs_r.min()
-            y_offset = cys.max() - ys_r.max() + (width // 2)
-            M1 = np.array([[1.0, 0.0, 0], [0.0, 1.0, y_offset]], dtype=np.float32)
+            cys, cxs, _ = np.where(track_mask == 255)
+            track_left_point = cxs.min() if cxs.size > 0 else 0
+            track_right_point = cxs.max() if cxs.size > 0 else 0
+            track_width = abs(track_right_point - track_left_point)
+
+            shift = 0
+            shift2 = 0
+            match line_pos:
+                case "left":
+                    shift = -(0.5 * abs(line_left_point - track_right_point))
+                    shift2 = 0.5 * abs(line_left_point - track_right_point)
+                case "right":
+                    shift = 0.5 * abs(line_left_point - track_left_point)
+                    shift2 = -(0.5 * abs(line_left_point - track_left_point))
+
+            M = np.array([[1.0, 0.0, shift], [0.0, 1.0, 0.0]], dtype=np.float32)
             checkpoint1 = cv.warpAffine(
-                rotated_mask, M1, (rotated_mask.shape[1], rotated_mask.shape[0])
+                rotated_mask, M, (finishline_mask.shape[1], finishline_mask.shape[0])
             )
 
-            y_offset = -(ys_r.min() - cys.min() + (width // 2))
-            M3 = np.array([[1.0, 0.0, 0], [0.0, 1.0, y_offset]], dtype=np.float32)
-            checkpoint3 = cv.warpAffine(
-                rotated_mask, M3, (rotated_mask.shape[1], rotated_mask.shape[0])
+            M_shift = np.array([[1.0, 0.0, shift2], [0.0, 1.0, 0.0]], dtype=np.float32)
+            checkpoint2 = cv.warpAffine(
+                rotated_mask, M_shift, (rotated_mask.shape[1], rotated_mask.shape[0])
             )
 
         case _:
@@ -251,7 +237,6 @@ def save_checkpoints():
 
     cv.imwrite("Track data/checkpoint1.jpg", checkpoint1)
     cv.imwrite("Track data/checkpoint2.jpg", checkpoint2)
-    cv.imwrite("Track data/checkpoint3.jpg", checkpoint3)
 
 
 def race_loop():
