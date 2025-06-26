@@ -1,7 +1,9 @@
 #include <Servo.h>
 #include <WiFi.h>
 #include <WiFiUdp.h>
-#include <MsgPack.h>
+// #include <MsgPack.h>
+void sendIP(int PacketSize);
+void carControls();
 
 WiFiUDP Udp;
 Servo servo;
@@ -48,54 +50,63 @@ void setup() {
   }
 }
 void loop() {
+
   int packetSize = Udp.parsePacket();
-  if (packetSize > 0) {
-    char buf[32];
-    Udp.read(buf, 32);
-    buf[packetSize] = '\0';
-
-    if (strcmp(buf, "DISCOVER_ARDUINO") == 0) {
-      Serial.println(Udp.remoteIP());
-      IPAddress ip = WiFi.localIP();
-      Udp.beginPacket(Udp.remoteIP(), 1420);
-      Udp.print("CAR1_IP:");
-      Udp.print(ip);
-      Udp.endPacket();
-    }
+  if (packetSize > 8) {
+    sendIP(packetSize);
+  } else if (packetSize == 8) {
+    carControls();
   }
+}
+void carControls() {
+  char buf[8];
+  float i0;
+  float i1;
+  Udp.read(buf, 8);
+  memcpy(&i0, buf, 4);
+  memcpy(&i1, buf + 4, 4);
+  int hForce = i1 * 255;
+  if (i0 > 0.05) {
+    Serial.println(i0);
+    analogWrite(LED_BUILTIN, 255);
+    int rotationAmount = 98 - (i0 * 45);
 
-  // char buf[8];
-  // float i0;
-  // float i1;
-  // packetSize = Udp.parsePacket();
-  // if (packetSize == 8) {
-  //   Udp.read(buf, 8);
-  //   memcpy(&i0, buf, 4);
-  //   memcpy(&i1, buf + 4, 4);
-  //   int hForce = i1 * 255;
-  //   if (i0 > 0.05) {
-  //     int rotationAmount = 98 - (i0 * 45);
-  //     servo.write(rotationAmount);
-  //   } else if (i0 < -0.05) {
-  //     int rotationAmount = 98 + (i0 * 45 * -1);
-  //     servo.write(rotationAmount);
-  //   } else {
-  //     servo.write(98);
-  //   }
-  //   if (i1 > 0.05) {
+    servo.write(rotationAmount);
+  } else if (i0 < -0.05) {
+    int rotationAmount = 98 + (i0 * 45 * -1);
+    servo.write(rotationAmount);
+  } else {
+    servo.write(98);
 
-  //     analogWrite(9, hForce);
-  //     digitalWrite(7, HIGH);
-  //     digitalWrite(8, LOW);
-  //   } else if (i1 < -0.05) {
+    analogWrite(LED_BUILTIN, 0);
+  }
+  if (i1 > 0.05) {
 
-  //     analogWrite(9, hForce * -1);
-  //     digitalWrite(7, LOW);
-  //     digitalWrite(8, HIGH);
-  //   } else {
-  //     analogWrite(9, 0);
-  //     digitalWrite(7, LOW);
-  //     digitalWrite(8, LOW);
-  //   }
-  // }
+    analogWrite(9, hForce);
+    digitalWrite(7, HIGH);
+    digitalWrite(8, LOW);
+  } else if (i1 < -0.05) {
+
+    analogWrite(9, hForce * -1);
+    digitalWrite(7, LOW);
+    digitalWrite(8, HIGH);
+  } else {
+    analogWrite(9, 0);
+    digitalWrite(7, LOW);
+    digitalWrite(8, LOW);
+  }
+}
+
+void sendIP(int packetSize) {
+  char buf[32];
+  Udp.read(buf, 32);
+  buf[packetSize] = '\0';
+
+  if (strcmp(buf, "DISCOVER_ARDUINO") == 0) {
+    Serial.println(Udp.remoteIP());
+    IPAddress ip = WiFi.localIP();
+    Udp.beginPacket(Udp.remoteIP(), 1420);
+    Udp.print("CAR1");
+    Udp.endPacket();
+  }
 }

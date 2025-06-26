@@ -1,5 +1,6 @@
 import socket
 import time
+from dotenv import load_dotenv, set_key
 
 
 def get_local_ip():
@@ -16,30 +17,26 @@ def get_local_ip():
 
 def get_broadcast_ip(local_ip):
     parts = local_ip.split(".")
-    parts[-1] = "255"  # Assuming subnet mask 255.255.255.0
+    parts[-1] = "255"
     return ".".join(parts)
 
 
-local_ip = get_local_ip()
-broadcast_ip = get_broadcast_ip(local_ip)
-# broadcast_ip = "192.168.10.255"
-print(broadcast_ip)
-
-DISCOVERY_MESSAGE = "DISCOVER_ARDUINO"
-UDP_PORT = 420
-LISTENER_PORT = 1420
-TIMEOUT = 3  # seconds
-MAX_DEVICES = 10
-
-
 def discover_arduinos():
+    local_ip = get_local_ip()
+    broadcast_ip = get_broadcast_ip(local_ip)
+
+    DISCOVERY_MESSAGE = "DISCOVER_ARDUINO"
+    UDP_PORT = 420
+    LISTENER_PORT = 1420
+    TIMEOUT = 3
+    MAX_DEVICES = 10
+
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     sock.settimeout(TIMEOUT)
     sock.bind(("", LISTENER_PORT))
 
     sock.sendto(DISCOVERY_MESSAGE.encode(), (broadcast_ip, UDP_PORT))
-    print("Searching for Arduinos...")
 
     found = []
 
@@ -50,17 +47,20 @@ def discover_arduinos():
             ip = addr[0]
             print(f"✅ {message} (at {ip})")
             found.append((message, ip))
+            match message:
+                case "CAR1":
+                    set_key("ipdata.env", "IP1", ip)
+                case "CAR2":
+                    set_key("ipdata.env", "IP2", ip)
+                case "CAR3":
+                    set_key("ipdata.env", "IP3", ip)
+                case "CAR4":
+                    set_key("ipdata.env", "AI_IP", ip)
 
             if len(found) >= MAX_DEVICES:
                 break
 
     except socket.timeout:
-        print("⏱️ Done listening.")
+        pass
     finally:
         sock.close()
-    return found
-
-
-if __name__ == "__main__":
-    devices = discover_arduinos()
-    print(f"\nFound {len(devices)} device(s).")

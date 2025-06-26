@@ -3,13 +3,15 @@ import serial
 import socket
 import struct
 import time
-from getip import *
+from getip import discover_arduinos
 from dotenv import load_dotenv, set_key
 from zeroconf import Zeroconf, ServiceBrowser, ServiceListener
 import os
 
 
 def move_towards_target(current, target, speed, dt):
+    if current > 0 and target < 0 or current < 0 and target > 0:
+        speed /= 1.5
     if current < target:
         current += dt / speed
         if current > target:
@@ -39,9 +41,7 @@ class User:
         self.controller = joystick
 
 
-ip = socket.gethostbyname("car1.local")
-print("IP address:", ip)
-
+discover_arduinos()
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 sock.setblocking(False)
@@ -57,7 +57,7 @@ if pygame.joystick.get_count() == 0:
 users = []
 
 users.append(User(pygame.joystick.Joystick(0), "Pekka Pomo", True))
-users.append(User(pygame.joystick.Joystick(0), "PekPom", False))
+# users.append(User(pygame.joystick.Joystick(0), "PekPom", False))
 
 PORT = 420
 
@@ -73,9 +73,9 @@ try:
             targetX = user.controller.get_axis(2) * user.speed
             targetY = -user.controller.get_axis(1) * user.speed
             currentX = move_towards_target(currentX, targetX, 2, dt)
-            currentY = move_towards_target(currentY, targetX, 0.01, dt)
+            currentY = move_towards_target(currentY, targetY, 0.01, dt)
             if user.ip != "0.0.0.0":
-                data = struct.pack("ff", currentY, currentX)
+                data = struct.pack("ff", currentX, currentY)
                 if data:
                     sock.sendto(data, (user.ip, PORT))
         clock.tick(60)
@@ -84,3 +84,7 @@ except KeyboardInterrupt:
     print("Exiting...")
 finally:
     pygame.quit()
+data = struct.pack("ff", 0, 0)
+for user in users:
+    if data:
+        sock.sendto(data, (user.ip, PORT))
