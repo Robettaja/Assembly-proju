@@ -17,7 +17,7 @@
 }
 
 html, body, #root {
-  height: 100%;
+  height: auto;
   width: 100%;
   margin: 0;
   padding: 0; 
@@ -39,7 +39,7 @@ html, body, #root {
   justify-content: center;
   align-items: center;
   text-align: center;
-  height: 100%;
+  
   width: 100vw;
   margin: 0;
 }
@@ -56,14 +56,11 @@ a:hover {
 body {
 
   flex-direction: column;
-  height: 100%;
   width: 100%;
   display: flex;
   place-items: center;
   min-width: 100vw;
   min-height: 100vh;
-  max-height: 300px;
-  
 }
 
 .nav-bar {
@@ -183,7 +180,6 @@ body {
   left: 0;
   width: 100vw;
   height: 100vh;
-  overflow: hidden;
   z-index: -1;
   justify-content: center;
   align-items: center;
@@ -197,12 +193,12 @@ body {
   top: 0;
   width: 100%;
   height: 100%;
-  overflow: hidden;
+  
 }
 
 .background-video, 
 .background-video-blur {
-  position: absolute;
+  position: fixed;
   display: flex;
   justify-content: center;
   top: 0;
@@ -278,7 +274,7 @@ input {
   display: inline-block;
   -webkit-transform: translate(0%, 0%);
   transform: translate(0%, 0%);
-  overflow: hidden;
+  
   color: #f7d4d4;
   font-size: 20px;
   letter-spacing: 2.5px;
