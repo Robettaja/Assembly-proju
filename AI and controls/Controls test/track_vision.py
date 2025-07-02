@@ -1,27 +1,11 @@
 import cv2 as cv
+import threading
 import cv2.aruco as aruco
-import time
 import numpy as np
-from ultralytics import YOLO
-import matplotlib.pyplot as plt
 from defisheye import Defisheye
 
-line_pos = ""
-
-
-def aruco_detect(img, aruco_mark_type):
-    img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-    img = cv.GaussianBlur(img, (5, 5), 0)
-    aruco_dict = aruco.getPredefinedDictionary(aruco_mark_type)
-    parameters = cv.aruco.DetectorParameters()
-    detector = cv.aruco.ArucoDetector(aruco_dict, parameters)
-    corners, ids, _ = detector.detectMarkers(img)
-    mask = np.zeros(img.shape, dtype=np.uint8)
-    if ids is not None:
-        for marker_corners in corners:
-            pts = marker_corners[0].astype(np.int32)
-            cv.fillConvexPoly(mask, pts, 255)
-    return mask
+line_pos_x = ""
+line_pos_y = ""
 
 
 def is_intersecting(mask1, mask2):
@@ -70,7 +54,9 @@ def get_track_mask(image):
     mask = cv.inRange(image, lower_blue, upper_blue)
     dialite_kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
     dialated_mask = cv.dilate(mask, dialite_kernel, iterations=2)
-    contours, hierarchy = cv.findContours(mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv.findContours(
+        dialated_mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE
+    )
 
     sorted_contours = sorted(contours, key=cv.contourArea, reverse=True)
     parent_contour = sorted_contours[0]
@@ -104,10 +90,12 @@ def get_finishline(img):
     cv.drawContours(
         mask, [sorted_contours[0]], -1, (255, 255, 255), thickness=cv.FILLED
     )
-    global line_pos
-    line_pos = white_pixels_side(mask, axis="x")
+    global line_pos_x
+    global line_pos_y
+    line_pos_x = white_pixels_side(mask, axis="x")
+    line_pos_y = white_pixels_side(mask, axis="y")
     track = cv.imread("Track data/track_mask.jpg", cv.IMREAD_GRAYSCALE)
-    ys, xs, _ = np.where(track == 255)
+    ys, xs = np.where(track == 255)
 
     if len(xs) > 0 and len(ys) > 0:
         x_min, x_max = xs.min(), xs.max()
@@ -142,6 +130,8 @@ def save_checkpoints():
     # Load necessary data
     track_mask = cv.imread("Track data/track_mask.jpg", cv.IMREAD_GRAYSCALE)
     finishline_mask = cv.imread("Track data/finishline_mask.jpg", cv.IMREAD_GRAYSCALE)
+    checkpoint1 = np.zeros_like(finishline_mask, dtype=np.uint8)
+    checkpoint2 = np.zeros_like(finishline_mask, dtype=np.uint8)
 
     orientation = get_line_orientation(
         finishline_mask
@@ -149,17 +139,17 @@ def save_checkpoints():
 
     match orientation:
         case "vertical":
-            line_location = white_pixels_side(finishline_mask, axis="x")
-            ys, xs, _ = np.where(finishline_mask == 255)
+            # line_location = white_pixels_side(finishline_mask, axis="x")
+            ys, xs = np.where(finishline_mask == 255)[:2]
             line_left_point = xs.min() if xs.size > 0 else 0
 
-            cys, cxs, _ = np.where(track_mask == 255)
+            cys, cxs = np.where(track_mask == 255)[:2]
             track_left_point = cxs.min() if cxs.size > 0 else 0
             track_right_point = cxs.max() if cxs.size > 0 else 0
 
             shift = 0
             dist = 0
-            match line_location:
+            match line_pos_x:
                 case "left":
                     dist = abs(line_left_point - track_left_point)
                     shift = abs(line_left_point - track_right_point) - dist
@@ -168,9 +158,18 @@ def save_checkpoints():
                     shift = -(abs(line_left_point - track_left_point)) + dist
 
             M = np.array([[1.0, 0.0, shift], [0.0, 1.0, 0.0]], dtype=np.float32)
-            checkpoint2 = cv.warpAffine(
-                finishline_mask, M, (finishline_mask.shape[1], finishline_mask.shape[0])
-            )
+            if line_pos_x == "left" and line_pos_y == "bottom":
+                checkpoint1 = cv.warpAffine(
+                    finishline_mask,
+                    M,
+                    (finishline_mask.shape[1], finishline_mask.shape[0]),
+                )
+            else:
+                checkpoint2 = cv.warpAffine(
+                    finishline_mask,
+                    M,
+                    (finishline_mask.shape[1], finishline_mask.shape[0]),
+                )
 
             M_rot = cv.getRotationMatrix2D((int(xs.mean()), int(ys.mean())), 90, 1)
             rotated_mask = cv.warpAffine(
@@ -182,14 +181,23 @@ def save_checkpoints():
             kernel = cv.getStructuringElement(cv.MORPH_RECT, (1920, 1))
             rotated_mask = cv.dilate(rotated_mask, kernel, iterations=1)
 
-            ys_r, xs_r = np.where(rotated_mask == 255)
+            ys_r, xs_r = np.where(rotated_mask == 255)[:2]
             height = track_mask.shape[0]
             shift = abs(ys_r.min() - (height // 2))
 
             M_shift = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, shift]], dtype=np.float32)
-            checkpoint1 = cv.warpAffine(
-                rotated_mask, M_shift, (rotated_mask.shape[1], rotated_mask.shape[0])
-            )
+            if line_pos_x == "left" and line_pos_y == "bottom":
+                checkpoint2 = cv.warpAffine(
+                    rotated_mask,
+                    M_shift,
+                    (rotated_mask.shape[1], rotated_mask.shape[0]),
+                )
+            else:
+                checkpoint1 = cv.warpAffine(
+                    rotated_mask,
+                    M_shift,
+                    (rotated_mask.shape[1], rotated_mask.shape[0]),
+                )
 
         case "horizontal":
             ys, xs, _ = np.where(finishline_mask == 255)
@@ -214,7 +222,8 @@ def save_checkpoints():
 
             shift = 0
             shift2 = 0
-            match line_pos:
+            # global line_pos_x
+            match line_pos_x:
                 case "left":
                     shift = -(0.5 * abs(line_left_point - track_right_point))
                     shift2 = 0.5 * abs(line_left_point - track_right_point)
@@ -239,51 +248,79 @@ def save_checkpoints():
     cv.imwrite("Track data/checkpoint2.jpg", checkpoint2)
 
 
-def race_loop():
+def race_loop(player1, player2=None):
+    from race_main import set_user_intersection
+
+    users = [player1]
+    if player2:
+        users.append(player2)
+    RESIZE_WIDTH = 1920
+    RESIZE_HEIGHT = 1080
+
+    lock = threading.Lock()
+    track = cv.imread("Track data/track_mask.jpg", cv.IMREAD_GRAYSCALE)
     line = cv.imread("Track data/finishline_mask.jpg", cv.IMREAD_GRAYSCALE)
+    checkpoint1 = cv.imread("Track data/checkpoint1.jpg", cv.IMREAD_GRAYSCALE)
+    checkpoint2 = cv.imread("Track data/checkpoint2.jpg", cv.IMREAD_GRAYSCALE)
+
+    line = cv.resize(line, (RESIZE_WIDTH, RESIZE_HEIGHT))
+    checkpoint1 = cv.resize(checkpoint1, (RESIZE_WIDTH, RESIZE_HEIGHT))
+    checkpoint2 = cv.resize(checkpoint2, (RESIZE_WIDTH, RESIZE_HEIGHT))
+    track = cv.resize(track, (RESIZE_WIDTH, RESIZE_HEIGHT))
+
+    checkpoints = [
+        line,
+        checkpoint1,
+        line,
+        checkpoint2,
+        checkpoint1,
+        checkpoint2,
+        line,
+    ]
 
     aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_APRILTAG_25H9)
     parameters = cv.aruco.DetectorParameters()
 
     detector = cv.aruco.ArucoDetector(aruco_dict, parameters)
     video = cv.VideoCapture(1)
-    video.set(cv.CAP_PROP_FRAME_WIDTH, 1920)
-    video.set(cv.CAP_PROP_FRAME_HEIGHT, 1080)
+    video.set(cv.CAP_PROP_FRAME_WIDTH, RESIZE_WIDTH)
+    video.set(cv.CAP_PROP_FRAME_HEIGHT, RESIZE_HEIGHT)
     ret, frame = video.read()
     last_car = np.zeros(frame.shape, dtype=np.uint8)
+    last_car = cv.cvtColor(last_car, cv.COLOR_BGR2GRAY)
 
     while True:
-        timer = time.time()
         ret, frame = video.read()
         if not ret:
             break
         gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+
         corners, ids, rejected = detector.detectMarkers(gray)
+        for user in users:
+            mask = np.zeros(gray.shape, dtype=np.uint8)
 
-        mask = np.zeros(frame.shape, dtype=np.uint8)
-        mask = cv.cvtColor(mask, cv.COLOR_BGR2GRAY)
+            if ids is not None:
+                for i, marker_id in enumerate(ids.flatten()):
+                    if marker_id == user.arucoID:
+                        pts = corners[i][0].astype(np.int32)
+                        cv.fillConvexPoly(mask, pts, (255, 255, 255))
 
-        if ids is not None:
-            for marker_corners in corners:
-                pts = marker_corners[0].astype(np.int32)
-                cv.fillConvexPoly(mask, pts, (255, 255, 255))
                 kernel = np.ones((9, 9), np.uint8)
                 mask = cv.dilate(mask, kernel, iterations=2)
-        if cv.countNonZero(mask) > 0:
-            last_car = mask
-        fps = 1 / (time.time() - timer)
-        cv.putText(
-            last_car,
-            f"FPS: {fps:.2f}",
-            (10, 30),
-            cv.FONT_HERSHEY_SIMPLEX,
-            1,
-            (255, 255, 255),
-            2,
-        )
-        # last_car = cv.resize(last_car, (640, 480))
-        # if is_intersecting(last_car, line):
-        #     print("Finish line crossed!")
+
+            if cv.countNonZero(mask) > 0:
+                last_car = mask
+                # last_car = cv.resize(last_car, (640, 480))
+                if is_intersecting(mask, track):
+                    with lock:
+                        set_user_intersection(0, True)
+
+            if user.nextCheckpointIndex < len(checkpoints) and is_intersecting(
+                last_car, checkpoints[user.nextCheckpointIndex]
+            ):
+                user.nextCheckpointIndex += 1
+            if user.nextCheckpointIndex >= len(checkpoints):
+                user.completedRace = True
 
         cv.imshow("Frame", last_car)
         # Exit on 'q' key press
@@ -291,15 +328,18 @@ def race_loop():
             break
 
 
-def track_test_loop():
+def initialize_data():
     video = cv.VideoCapture(1)
     ret, frame = video.read()
     track_mask = get_track_mask(frame)
     cv.imwrite("Track data/track_mask.jpg", track_mask)
     line = get_finishline(frame)
     cv.imwrite("Track data/finishline_mask.jpg", line)
+    cv.imwrite("Track data/reference.jpg", frame)
+    save_checkpoints()
 
 
-track_test_loop()
-save_checkpoints()
-# race_loop()
+if __name__ == "__main__":
+    pass
+    # user1 = User(pygame.joystick.Joystick(0), "Player 1")
+    # race_loop(user1, None)

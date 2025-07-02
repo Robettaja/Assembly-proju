@@ -20,14 +20,14 @@ using UnityEngine;
 
 
 
-        public Car(Transform carTrans, SelfDrivingVehicle.VehicleDataController carDataController)
-        {
-            this.carData = carDataController.carData;
-
-            this.rearWheelPos = carDataController.RearWheelPos(carTrans);
-
-            this.heading = carDataController.HeadingInRadians(carTrans);
-        }
+        // public Car(Transform carTrans, SelfDrivingVehicle.VehicleDataController carDataController)
+        // {
+        //     this.carData = carDataController.carData;
+        //
+        //     this.rearWheelPos = carDataController.RearWheelPos(carTrans);
+        //
+        //     this.heading = carDataController.HeadingInRadians(carTrans);
+        // }
 
 
 

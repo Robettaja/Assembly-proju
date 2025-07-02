@@ -929,7 +929,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2073023648}
-  - component: {fileID: 2073023647}
   - component: {fileID: 2073023649}
   m_Layer: 0
   m_Name: Grid
@@ -938,24 +937,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &2073023647
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2073023646}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c50ba78fbb517944e8f5b98087fb15b6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  player: {fileID: 1622993752}
-  unwalkableMask:
-    serializedVersion: 2
-    m_Bits: 64
-  gridWorldSize: {x: 30, y: 30}
-  nodeRadius: 0.5
 --- !u!4 &2073023648
 Transform:
   m_ObjectHideFlags: 0
@@ -980,11 +961,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 2073023646}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5af3e0bce7770374da50d19b92820ac9, type: 3}
+  m_Script: {fileID: 11500000, guid: 9b9795eb60f8b9f40acf74ecebd97940, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  seeker: {fileID: 1622993752}
-  target: {fileID: 1226161179}
+  unwalkableMask:
+    serializedVersion: 2
+    m_Bits: 64
+  gridWorldSize: {x: 30, y: 30}
+  cellRadius: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
