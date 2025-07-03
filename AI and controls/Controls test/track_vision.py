@@ -2,7 +2,7 @@ import cv2 as cv
 import threading
 import cv2.aruco as aruco
 import numpy as np
-from defisheye import Defisheye
+# from defisheye import Defisheye
 
 line_pos_x = ""
 line_pos_y = ""

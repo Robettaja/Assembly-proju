@@ -8,8 +8,8 @@ void carControls();
 WiFiUDP Udp;
 Servo servo;
 
-const char *ssid = "-Tomi-";
-const char *pass = "Tomi1104!";
+const char *ssid = "Roope";
+const char *pass = "12345678";
 
 unsigned int port = 420;
 char packetBuffer[255];
@@ -20,7 +20,6 @@ void setup() {
     ;
 
   servo.attach(4);
-  pinMode(7, OUTPUT);
   pinMode(8, OUTPUT);
   pinMode(9, OUTPUT);
 
@@ -31,8 +30,10 @@ void setup() {
 
     WiFi.begin(ssid, pass); // Start connecting to WiFi
     while (WiFi.status() != WL_CONNECTED) {
-      delay(10);
+      delay(100);
     }
+    isConnected = true;
+
     if (WiFi.localIP() != "0.0.0.0")
       isConnected = true;
   }
@@ -59,6 +60,7 @@ void loop() {
   }
 }
 void carControls() {
+
   char buf[8];
   float i0;
   float i1;
@@ -83,16 +85,13 @@ void carControls() {
   if (i1 > 0.05) {
 
     analogWrite(9, hForce);
-    digitalWrite(7, HIGH);
-    digitalWrite(8, LOW);
+    digitalWrite(8, HIGH);
   } else if (i1 < -0.05) {
 
     analogWrite(9, hForce * -1);
-    digitalWrite(7, LOW);
-    digitalWrite(8, HIGH);
+    digitalWrite(8, LOW);
   } else {
     analogWrite(9, 0);
-    digitalWrite(7, LOW);
     digitalWrite(8, LOW);
   }
 }

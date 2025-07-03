@@ -7,7 +7,6 @@ import sys
 
 
 cap = cv.VideoCapture("rtsp://raspberrypi:8554/cam1")
-model = YOLO("best.pt")
 
 params = aruco.DetectorParameters()
 tag = aruco.getPredefinedDictionary(aruco.DICT_4X4_250)
