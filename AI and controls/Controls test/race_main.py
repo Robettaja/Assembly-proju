@@ -50,7 +50,7 @@ class User:
         if not is_player:
             self.ip = os.getenv("AI_IP")
         else:
-            self.ip = os.getenv("IP" + str(self.id))
+            self.ip = os.getenv("IP" + str(arucoID))
             self.is_player = is_player
             joystick = pygame.joystick.Joystick(player_number - 1)
             joystick.init()
