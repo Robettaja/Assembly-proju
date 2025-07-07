@@ -171,6 +171,15 @@ function App() {
           });
         };
 
+        
+    const formatElapsed = (ms) => {
+        const minutes = String(Math.floor(ms / 60000) % 60).padStart(2, "0");
+        const seconds = String(Math.floor(ms / 1000) % 60).padStart(2, "0");
+        const milliseconds = String(Math.floor((ms % 1000) / 10)).padStart(2, "0");
+        return `${minutes}:${seconds}:${milliseconds}`;
+    };
+    
+
 
       /*
       function formatTime(){
@@ -246,7 +255,7 @@ function App() {
   */
 
   return (
-<>
+
 <div className = "App">
   <div className="video-background-container1">
         <video autoPlay muted loop playsInline className= "background-video-blur blur-sm w-100">
@@ -349,94 +358,69 @@ function App() {
           
         ) : (
           
-          <div className= "display-container">
-            <div className="flex flex-col md:flex-row justify-around gap-8">
-              <div className = "flex flex-col items-center">
-                <h3>{username1}</h3>
+          <>
+            <div className= "display-container">
               <Countdown
-              onLap = {(lapTime) => {
-                const index = laps1.length;
-                if (userIds[0]) {
-                  saveLapTime(userrIds[0], index, lapTime).then(() => {
-                    setLaps1((prev) => [...prev, lapTTime]);
-                    fetchUsernames();
-                  });
-                }
-              }}
+                onTimeUpdated = {(ms) => setElapsedTime(ms)}/>
 
-              onFinish = {(total) => {
-                if (userIds[0]) {
-                  saveTotalTime(userIds[0], total).then(fetchUsernames);
+              <div className="flex flex-col md:flex-row justify-around gap-8">
+                {[{name: username1, id: userIds[0], laps: laps1, setLaps: setLaps1},
+                { name: username2, id: userIds[1], laps: laps2, setLaps: setLaps2}]
+                .map((user, idx) => (
+                  <div key = {idx} className="flex flex-col items-center">
+                    <h3>{user.name}</h3>
 
-                }
-              }}
-              
-              />
 
-              <div className = "text-sm text-gray-700">
-                kierrokset: {laps1.join(", ")} 
-                yhteensä: {totalTime(laps1)}
+                  <button
+                  className ="button-lap"
+                  disabled={user.laps.length >= 3}
+                    onClick={() => {
+                      const formatted = formatElapsed(elapsedTime);
+                      const index = user.laps.length;
+
+                      saveLapTime(user.id, index, formatted).then(() => {
+                        user.setLaps((prev) => [...prev, formatted]);
+
+                        if (index === 2) {
+                          const total = totalTime([...user.laps, formatted]);
+                          saveTotalTime(user.id, total).then(fetchUsernames);
+                        }
+                      });
+                    }}      
+                  >
+              laptime
+            </button>
+                
+                <div className = "text-sm text-gray-700 text-center mt-2">
+                  kierrokset: {user.laps.join(", ")} <br/>
+                  yhteensä: {totalTime(user.laps)}
+                </div>
+                  </div>
+                ))} 
+                </div>
               </div>
-            </div>
+                
 
-              <div className="flex flex-col items-center">
-                <h3>{username2}</h3>
-
-                <Countdown
-                onLap = {(lapTime) => {
-                  const index = laps2.length;
-                  if (userIds[1]) {
-                    saveLapTime(userIds[1], index, lapTime).then(() => {
-                      setLaps2((prev) => [...prev, lapTime]);
-                      fetchUsernames();
-                    });
-                  }
-                }}
-
-                onFinish = {(total) => {
-                  if (userIds[1]) {
-                    saveTotalTime(userIds[1], total).then(fetchUsernames);
-                  }
-                }}
-                />
-
-              <div className = "text-sm text-gray-700">
-                kierrokset: {laps2.join(", ")}
-                yhteensä: {totalTime(laps2)}
-              </div>
-              </div>
-            
-
-              <button onClick={() => {
-                setSubmitted(false)
-                setUser("");
-                reset();
-              
-              }} id="back-arrow">
-                <VscArrowLeft />
-              </button>
-              
-
-          </div>
-        </div>
+                <button onClick={() => {
+                  setSubmitted(false)
+                  setUser("");
+                  reset();
+                
+                }} id="back-arrow">
+                  <VscArrowLeft />
+                </button>
+            </>
+       
         
-              
-        )}
-          <div className="flex flex-col md:flex-row justify-around gap-8">
-          
-
-          
-          </div>  
+      )}
 
       <div className="footer absolute bottom-0 left-0 w-full p-4 text-center text-gray-400 text-sm z-20">
         <p>© 2025 Saija Joronen. All rights reserved.</p>
       </div>
-      </div>
-      </div>          
-      </div>
+    </div>
 
 
-        } />
+         
         <Route path="/users" element={
           <Users
             usernames = {usernames}
@@ -447,13 +431,14 @@ function App() {
         <Route path="/leaderboard" element={
           <Leaderboard usernames = {usernames} />
         } />
-
+        
       </Routes>
           
-  </div>
+
 
 </Router>
 </div>
+
 </div>
 </>
   );

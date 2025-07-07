@@ -66,43 +66,7 @@ const Countdown = ({onLap, onFinish}) => {
         }
     };
 
-        const totalTime = (laps) => {
-            const toMs = (str) => {
-                const [m, s, ms] = str.split(":").map(Number);
-                return m * 60000 + s * 1000 + ms * 10;
-            };
-            const sum = laps.reduce((acc, lap) => acc + toMs(lap), 0);
-            const minutes = String(Math.floor(sum / 60000) % 60).padStart(2, "0");
-            const seconds = String(Math.floor(sum / 1000) % 60).padStart(2, "0");
-            const milliseconds = String(Math.floor((sum % 1000) / 10)).padStart(2, "0");
-            return `${minutes}:${seconds}:${milliseconds}`;
-        };
 
-    const saveLapTime = (userId, lapIndex, time) => {
-        const field = `lap${lapIndex + 1}`;
-          return fetch(`http://127.0.0.1:8000/api/usernames/${userId}/`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                [field]: time,
-            }),
-          });
-    };
-
-    const saveTotalTime = (userId, total) => {
-          return fetch(`http://127.0.0.1:8000/api/usernames/${userId}/`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                total_time: total,
-            }),
-          });
-        };
-    
 
 
    
