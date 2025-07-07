@@ -150,7 +150,7 @@ function App() {
             method: "PUT",
             headers: {
               "Content-Type": "application/json"},
-            body: JSON.stringify({laptime: lapTime, user }),
+            body: JSON.stringify({total_time: lapTime, user }),
           });
           fetchUsernames(); // Refresh the list of usernames
         }
@@ -219,7 +219,7 @@ function App() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ laptime: total }),
+        body: JSON.stringify({ total_time: total }),
       }).then(fetchUsernames);
     }
   }, [laps1, userIds]);
@@ -232,7 +232,7 @@ function App() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ laptime: total }),
+        body: JSON.stringify({ total_time: total }),
       }).then(fetchUsernames);
       }
   }, [laps2, userIds]);
@@ -353,8 +353,7 @@ function App() {
             <div>
               <Countdown/>
               </div>
-            <div className="display">{formatTime()}</div>
-            <h2>Race</h2>
+            
 
               <button onClick={() => {
                 setSubmitted(false)

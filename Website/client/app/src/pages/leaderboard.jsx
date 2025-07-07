@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 
 const Leaderboard = ({usernames}) => {
     const sorted = usernames
-        .filter(u => u.laptime)
-        .sort((a, b) => a.laptime.localeCompare(b.laptime));
+        .filter(u => u.total_time)
+        .sort((a, b) => a.total_time.localeCompare(b.total_time));
         
 
     const topUser = sorted[0]
@@ -12,9 +12,9 @@ const Leaderboard = ({usernames}) => {
         <div className="App">
         <div className="p-4">
             <h1 class="m-6 text-white text 2x1">Leaderboard</h1>
-            <div className="overflow-auto max-h-[700vh] border rounded sh">    
+            <div className="max-h-[700vh] border rounded sh">    
             <table class="min-w-full ">
-                <thead class="bg-gray-200 sticky top-0 z-10">
+                <thead class="bg-gray-200 sticky top-0">
                     <tr class="shadow-md my-8">
                         <th class="p-2">#</th>
                         <th class="p-2">Username</th>
@@ -33,7 +33,7 @@ const Leaderboard = ({usernames}) => {
                         <tr key={user.id} class="border-b bg-gray-100 ">
                             <td class="border-r p-4">{index + 1}</td>
                             <td class="border-r">{user.user}</td>
-                            <td class="border-r p-2">{user.laptime}</td>
+                            <td class="border-r p-2">{user.total_time}</td>
                             <td class="border-r p-2">{user.lap1 || '-'}</td>
                             <td class="border-r p-2">{user.lap2 || '-'}</td>
                             <td class=" p-2">{user.lap3 || '-'}</td>
