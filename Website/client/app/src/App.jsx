@@ -134,38 +134,45 @@ function App() {
   
       }, [isRunning]);
 
+           const totalTime = (laps) => {
+            const toMs = (str) => {
+                const [m, s, ms] = str.split(":").map(Number);
+                return m * 60000 + s * 1000 + ms * 10;
+            };
+            const sum = laps.reduce((acc, lap) => acc + toMs(lap), 0);
+            const minutes = String(Math.floor(sum / 60000) % 60).padStart(2, "0");
+            const seconds = String(Math.floor(sum / 1000) % 60).padStart(2, "0");
+            const milliseconds = String(Math.floor((sum % 1000) / 10)).padStart(2, "0");
+            return `${minutes}:${seconds}:${milliseconds}`;
+        };
 
-      function start(){ 
-          setIsRunning(true);
-          startTimeRef.current = Date.now() - elapsedTime;
-      } 
-  
-      const stop = async () => {
-        setIsRunning(false);
-        const lapTime = formatTime();
-        setLaps((prev) => [...prev, lapTime]);
-
-        if (lastUserId) {
-          await fetch(`http://127.0.0.1:8000/api/usernames/${lastUserId}/`, {
+   const saveLapTime = (userId, lapIndex, time) => {
+        const field = `lap${lapIndex + 1}`;
+          return fetch(`http://127.0.0.1:8000/api/usernames/${userId}/`, {
             method: "PUT",
             headers: {
-              "Content-Type": "application/json"},
-            body: JSON.stringify({total_time: lapTime, user }),
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                [field]: time,
+            }),
           });
-          fetchUsernames(); // Refresh the list of usernames
-        }
+    };
 
-        
-      };
-  
-      function reset(){
+    const saveTotalTime = (userId, total) => {
+          return fetch(`http://127.0.0.1:8000/api/usernames/${userId}/`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                total_time: total,
+            }),
+          });
+        };
 
-        setElapsedTime(0);
-        setIsRunning(false);  
-        setLaps1([]);
-        setLaps2([]);
-      }
-  
+
+      /*
       function formatTime(){
 
         let hours = Math.floor(elapsedTime / (1000 * 60 * 60));
@@ -236,17 +243,10 @@ function App() {
       }).then(fetchUsernames);
       }
   }, [laps2, userIds]);
+  */
 
   return (
-    
 <>
-
-
-
-
-
-
- 
 <div className = "App">
   <div className="video-background-container1">
         <video autoPlay muted loop playsInline className= "background-video-blur blur-sm w-100">
@@ -350,8 +350,60 @@ function App() {
         ) : (
           
           <div className= "display-container">
-            <div>
-              <Countdown/>
+            <div className="flex flex-col md:flex-row justify-around gap-8">
+              <div className = "flex flex-col items-center">
+                <h3>{username1}</h3>
+              <Countdown
+              onLap = {(lapTime) => {
+                const index = laps1.length;
+                if (userIds[0]) {
+                  saveLapTime(userrIds[0], index, lapTime).then(() => {
+                    setLaps1((prev) => [...prev, lapTTime]);
+                    fetchUsernames();
+                  });
+                }
+              }}
+
+              onFinish = {(total) => {
+                if (userIds[0]) {
+                  saveTotalTime(userIds[0], total).then(fetchUsernames);
+
+                }
+              }}
+              
+              />
+
+              <div className = "text-sm text-gray-700">
+                kierrokset: {laps1.join(", ")} 
+                yhteensä: {totalTime(laps1)}
+              </div>
+            </div>
+
+              <div className="flex flex-col items-center">
+                <h3>{username2}</h3>
+
+                <Countdown
+                onLap = {(lapTime) => {
+                  const index = laps2.length;
+                  if (userIds[1]) {
+                    saveLapTime(userIds[1], index, lapTime).then(() => {
+                      setLaps2((prev) => [...prev, lapTime]);
+                      fetchUsernames();
+                    });
+                  }
+                }}
+
+                onFinish = {(total) => {
+                  if (userIds[1]) {
+                    saveTotalTime(userIds[1], total).then(fetchUsernames);
+                  }
+                }}
+                />
+
+              <div className = "text-sm text-gray-700">
+                kierrokset: {laps2.join(", ")}
+                yhteensä: {totalTime(laps2)}
+              </div>
               </div>
             
 
@@ -363,66 +415,25 @@ function App() {
               }} id="back-arrow">
                 <VscArrowLeft />
               </button>
-              <div className = "username-container">
-                <div className="username-box">
-                  <h2>{username1}</h2>
-                  <div className="laps">
-                    <p>lap1: {laps1[0] || ""}
-                      <button className="button-lap" onClick={handleLap1} disabled = {laps1.length >= 3}>Lap</button>
-                      </p> 
-                    <p>lap2: {laps1[1] || ""}
-                      <button className="button-lap" onClick={handleLap1} disabled = {laps1.length >= 3}>Lap</button>
-                      </p> 
-                    <p>lap3: {laps1[2] || ""}
-                      <button className="button-lap" onClick={handleLap1} disabled = {laps1.length >= 3}>Lap</button>
-                      </p> 
-                    <p>Total: {totalTime(laps1)} 
-                    </p>
+              
 
-                  </div>
-                 
-                </div>
-
-                <div className="username-box">
-                  <h2>{username2}</h2>
-                  <div className="laps">
-                    <p>lap1: {laps2[0] || ""}
-                      <button className="button-lap" onClick={handleLap2} disabled = {laps2.length >= 3}>Lap</button>
-                      </p> 
-                    <p>lap2: {laps2[1] || ""}
-                      <button className="button-lap" onClick={handleLap2} disabled = {laps2.length >= 3}>Lap</button>
-                      </p> 
-                    <p>lap3: {laps2[2] || ""}
-                      <button className="button-lap" onClick={handleLap2} disabled = {laps2.length >= 3}>Lap</button>
-                      </p> 
-                    <p>Total: {totalTime(laps2)}
-                    </p>
-
-
-                  </div>
-
-                    
-                  
-                  </div>
-                    <div>
-                      <button onClick={start} className="start-button">Start</button>
-                      <button onClick={stop} className="stop-button">Stop</button>
-                    </div>
-              </div>  
           </div>
+        </div>
         
+              
         )}
-      </div>
-      </div>
+          <div className="flex flex-col md:flex-row justify-around gap-8">
+          
 
- 
-        
+          
+          </div>  
+
       <div className="footer absolute bottom-0 left-0 w-full p-4 text-center text-gray-400 text-sm z-20">
         <p>© 2025 Saija Joronen. All rights reserved.</p>
       </div>
-    
-    
-        </div>
+      </div>
+      </div>          
+      </div>
 
 
         } />
