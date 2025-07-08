@@ -2,20 +2,19 @@ import React, {useState, useRef, useEffect} from "react";
 
 
 
-const Countdown = () => {
+const Countdown = ({onLap, onFinish}) => {
 
     const [countdownTime, setCountdownTime] = useState(10);
     const [timerRunning, setTimerRunning] = useState(false);
     const [elapsedTime, setElapsedTime] = useState(0);
+    const [laps, setLaps] = useState([]);
 
     const countdownRef = useRef(null);
     const timerIntervalRef = useRef(null);
     const startTimeRef = useRef(null);
 
     const formatCountdown = (seconds) => {
-        const m = String(Math.floor(seconds / 60)).padStart(2, "0");
-        const s = String(seconds % 60).padStart(2, "0");
-        return `${s}`;
+        return String(seconds % 60).padStart(2, "0");
     };
 
     const formatElapsed = (ms) => {
@@ -51,6 +50,24 @@ const Countdown = () => {
             
      }, [timerRunning]);
 
+     const handleLap = () => {
+        const lapTime = formatElapsed(elapsedTime);
+        const updatedLaps = [...laps, lapTime];
+        setLaps(updatedLaps);
+
+        if (onLap) onLap(lapTime);
+
+        if (updatedLaps.length === 3) {
+            clearInterval(timerIntervalRef.current);
+            setTimerRunning(false);
+
+            const total = totalTime(updatedLaps);
+            if (onFinish) onFinish(total);
+        }
+    };
+
+
+
 
    
 
@@ -70,10 +87,17 @@ const Countdown = () => {
                     
                 </div>
             </div>   
-
-        
         </div>
-   </div>
-)};
+
+        {timerRunning && (
+            <div className = "flex flex-col items-center mt-4 gap-2">
+                <button onClick = {handleLap} className="button-lap">
+                laptime
+                </button>
+                </div>
+        )}
+    </div>
+    );
+};
 
 export default Countdown;

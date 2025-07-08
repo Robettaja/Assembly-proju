@@ -134,38 +134,54 @@ function App() {
   
       }, [isRunning]);
 
+           const totalTime = (laps) => {
+            const toMs = (str) => {
+                const [m, s, ms] = str.split(":").map(Number);
+                return m * 60000 + s * 1000 + ms * 10;
+            };
+            const sum = laps.reduce((acc, lap) => acc + toMs(lap), 0);
+            const minutes = String(Math.floor(sum / 60000) % 60).padStart(2, "0");
+            const seconds = String(Math.floor(sum / 1000) % 60).padStart(2, "0");
+            const milliseconds = String(Math.floor((sum % 1000) / 10)).padStart(2, "0");
+            return `${minutes}:${seconds}:${milliseconds}`;
+        };
 
-      function start(){ 
-          setIsRunning(true);
-          startTimeRef.current = Date.now() - elapsedTime;
-      } 
-  
-      const stop = async () => {
-        setIsRunning(false);
-        const lapTime = formatTime();
-        setLaps((prev) => [...prev, lapTime]);
-
-        if (lastUserId) {
-          await fetch(`http://127.0.0.1:8000/api/usernames/${lastUserId}/`, {
+   const saveLapTime = (userId, lapIndex, time) => {
+        const field = `lap${lapIndex + 1}`;
+          return fetch(`http://127.0.0.1:8000/api/usernames/${userId}/`, {
             method: "PUT",
             headers: {
-              "Content-Type": "application/json"},
-            body: JSON.stringify({laptime: lapTime, user }),
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                [field]: time,
+            }),
           });
-          fetchUsernames(); // Refresh the list of usernames
-        }
+    };
+
+    const saveTotalTime = (userId, total) => {
+          return fetch(`http://127.0.0.1:8000/api/usernames/${userId}/`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                total_time: total,
+            }),
+          });
+        };
 
         
-      };
-  
-      function reset(){
+    const formatElapsed = (ms) => {
+        const minutes = String(Math.floor(ms / 60000) % 60).padStart(2, "0");
+        const seconds = String(Math.floor(ms / 1000) % 60).padStart(2, "0");
+        const milliseconds = String(Math.floor((ms % 1000) / 10)).padStart(2, "0");
+        return `${minutes}:${seconds}:${milliseconds}`;
+    };
+    
 
-        setElapsedTime(0);
-        setIsRunning(false);  
-        setLaps1([]);
-        setLaps2([]);
-      }
-  
+
+      /*
       function formatTime(){
 
         let hours = Math.floor(elapsedTime / (1000 * 60 * 60));
@@ -219,7 +235,7 @@ function App() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ laptime: total }),
+        body: JSON.stringify({ total_time: total }),
       }).then(fetchUsernames);
     }
   }, [laps1, userIds]);
@@ -232,21 +248,14 @@ function App() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ laptime: total }),
+        body: JSON.stringify({ total_time: total }),
       }).then(fetchUsernames);
       }
   }, [laps2, userIds]);
+  */
 
   return (
-    
-<>
 
-
-
-
-
-
- 
 <div className = "App">
   <div className="video-background-container1">
         <video autoPlay muted loop playsInline className= "background-video-blur blur-sm w-100">
@@ -349,84 +358,69 @@ function App() {
           
         ) : (
           
-          <div className= "display-container">
-            <div>
-              <Countdown/>
-              </div>
-            <div className="display">{formatTime()}</div>
-            <h2>Race</h2>
+          <>
+            <div className= "display-container">
+              <Countdown
+                onTimeUpdated = {(ms) => setElapsedTime(ms)}/>
 
-              <button onClick={() => {
-                setSubmitted(false)
-                setUser("");
-                reset();
-              
-              }} id="back-arrow">
-                <VscArrowLeft />
-              </button>
-              <div className = "username-container">
-                <div className="username-box">
-                  <h2>{username1}</h2>
-                  <div className="laps">
-                    <p>lap1: {laps1[0] || ""}
-                      <button className="button-lap" onClick={handleLap1} disabled = {laps1.length >= 3}>Lap</button>
-                      </p> 
-                    <p>lap2: {laps1[1] || ""}
-                      <button className="button-lap" onClick={handleLap1} disabled = {laps1.length >= 3}>Lap</button>
-                      </p> 
-                    <p>lap3: {laps1[2] || ""}
-                      <button className="button-lap" onClick={handleLap1} disabled = {laps1.length >= 3}>Lap</button>
-                      </p> 
-                    <p>Total: {totalTime(laps1)} 
-                    </p>
+              <div className="flex flex-col md:flex-row justify-around gap-8">
+                {[{name: username1, id: userIds[0], laps: laps1, setLaps: setLaps1},
+                { name: username2, id: userIds[1], laps: laps2, setLaps: setLaps2}]
+                .map((user, idx) => (
+                  <div key = {idx} className="flex flex-col items-center">
+                    <h3>{user.name}</h3>
 
-                  </div>
-                 
+
+                  <button
+                  className ="button-lap"
+                  disabled={user.laps.length >= 3}
+                    onClick={() => {
+                      const formatted = formatElapsed(elapsedTime);
+                      const index = user.laps.length;
+
+                      saveLapTime(user.id, index, formatted).then(() => {
+                        user.setLaps((prev) => [...prev, formatted]);
+
+                        if (index === 2) {
+                          const total = totalTime([...user.laps, formatted]);
+                          saveTotalTime(user.id, total).then(fetchUsernames);
+                        }
+                      });
+                    }}      
+                  >
+              laptime
+            </button>
+                
+                <div className = "text-sm text-gray-700 text-center mt-2">
+                  kierrokset: {user.laps.join(", ")} <br/>
+                  yhteensä: {totalTime(user.laps)}
                 </div>
-
-                <div className="username-box">
-                  <h2>{username2}</h2>
-                  <div className="laps">
-                    <p>lap1: {laps2[0] || ""}
-                      <button className="button-lap" onClick={handleLap2} disabled = {laps2.length >= 3}>Lap</button>
-                      </p> 
-                    <p>lap2: {laps2[1] || ""}
-                      <button className="button-lap" onClick={handleLap2} disabled = {laps2.length >= 3}>Lap</button>
-                      </p> 
-                    <p>lap3: {laps2[2] || ""}
-                      <button className="button-lap" onClick={handleLap2} disabled = {laps2.length >= 3}>Lap</button>
-                      </p> 
-                    <p>Total: {totalTime(laps2)}
-                    </p>
-
-
                   </div>
+                ))} 
+                </div>
+              </div>
+                
 
-                    
-                  
-                  </div>
-                    <div>
-                      <button onClick={start} className="start-button">Start</button>
-                      <button onClick={stop} className="stop-button">Stop</button>
-                    </div>
-              </div>  
-          </div>
+                <button onClick={() => {
+                  setSubmitted(false)
+                  setUser("");
+                  reset();
+                
+                }} id="back-arrow">
+                  <VscArrowLeft />
+                </button>
+            </>
+       
         
-        )}
-      </div>
-      </div>
+      )}
 
- 
-        
       <div className="footer absolute bottom-0 left-0 w-full p-4 text-center text-gray-400 text-sm z-20">
         <p>© 2025 Saija Joronen. All rights reserved.</p>
       </div>
-    
-    
-        </div>
+    </div>
 
 
-        } />
+         
         <Route path="/users" element={
           <Users
             usernames = {usernames}
@@ -437,13 +431,14 @@ function App() {
         <Route path="/leaderboard" element={
           <Leaderboard usernames = {usernames} />
         } />
-
+        
       </Routes>
           
-  </div>
+
 
 </Router>
 </div>
+
 </div>
 </>
   );

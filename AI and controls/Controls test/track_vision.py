@@ -48,12 +48,26 @@ def white_pixels_side(mask, axis="y"):
 
 
 def get_track_mask(image):
+    hsv = cv.cvtColor(image, cv.COLOR_BGR2HSV)
+
+    # Define lower and upper bounds for red in HSV
+    lower_red1 = np.array([0, 70, 50])
+    upper_red1 = np.array([10, 255, 255])
+
+    lower_red2 = np.array([160, 70, 50])
+    upper_red2 = np.array([180, 255, 255])
+
+    # Create two masks and combine them
+    mask1 = cv.inRange(hsv, lower_red1, upper_red1)
+    mask2 = cv.inRange(hsv, lower_red2, upper_red2)
+    red_mask = cv.bitwise_or(mask1, mask2)
+
     lower_blue = np.array([90, 45, 30])  # Lower hue, lower saturation and brightness
     upper_blue = np.array([140, 255, 255])  # Keep upper bound wide
     image = cv.cvtColor(image, cv.COLOR_BGR2HSV)
     mask = cv.inRange(image, lower_blue, upper_blue)
     dialite_kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
-    dialated_mask = cv.dilate(mask, dialite_kernel, iterations=2)
+    dialated_mask = cv.dilate(red_mask, dialite_kernel, iterations=2)
     contours, hierarchy = cv.findContours(
         dialated_mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE
     )
@@ -328,6 +342,14 @@ def race_loop(player1, player2=None):
             break
 
 
+def save_track_data():
+    cap = cv.VideoCapture("rtsp://raspberrypi:8554/cam1", cv.CAP_FFMPEG)
+    ret, frame = cap.read()
+    track_mask = get_track_mask(frame)
+    cv.imwrite("Track data/track_mask.jpg", track_mask)
+    cv.imwrite("Track data/reference.jpg", frame)
+
+
 def initialize_data():
     video = cv.VideoCapture(1)
     ret, frame = video.read()
@@ -340,6 +362,6 @@ def initialize_data():
 
 
 if __name__ == "__main__":
-    pass
+    save_track_data()
     # user1 = User(pygame.joystick.Joystick(0), "Player 1")
     # race_loop(user1, None)

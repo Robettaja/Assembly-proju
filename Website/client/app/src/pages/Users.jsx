@@ -43,7 +43,7 @@ const Users = ({usernames, deleteUser}) => {
             <div className="username-email">
                 Username: {username.user} <br />
                 
-                Laptime: {username.laptime}
+                Laptime: {username.total_time}
             </div>
         </div>
        ))}
