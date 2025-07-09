@@ -31,13 +31,19 @@ def move_towards_target(current, target, speed, dt):
     return current
 
 
+class RaceData:
+    def __init__(self, laps: int = 1, clockwise: bool = False):
+        self.laps = laps  # Kuinka monta kierrosta radalla ajetaan
+        self.clockwise = clockwise  # Ajetaan radalla myötäpäivään vai vastapäivään oletus vastapäivään
+
+
 class User:
     def __init__(
         self,
-        player_number: int,
-        name: str,
-        arucoID: int,  # determined later
-        is_player: bool = True,
+        player_number: int,  # Esim pelaaja 1 2
+        name: str,  # Pelaajan nimi
+        arucoID: int,  # Mitä autoa pelaaja ohjaa (määritetään myöhemmin)
+        is_player: bool = True,  # Onko pelaaja vai tekoäly Vain pelaaja 2 kohdalla mahdollinen valita
     ):
         load_dotenv("ipdata.env")
         self.id = player_number
@@ -45,6 +51,7 @@ class User:
         self.raceTime = 0
         self.completedRace = False
         self.nextCheckpointIndex = 0
+        self.lapsCompleted = 0
         self.name = name
         self.speed = 1.0
         if not is_player:
@@ -104,7 +111,7 @@ def input_loop(player1, player2=None):
                     user.speed = 1.0
 
                 targetY = -user.controller.get_axis(1) * user.speed
-                targetX = user.controller.get_axis(2) * user.speed
+                targetX = user.controller.get_axis(3) * user.speed
                 currentX = move_towards_target(currentX, targetX, 0.01, dt)
                 currentY = move_towards_target(currentY, targetY, 0.5, dt)
                 if user.ip != "0.0.0.0":
@@ -133,9 +140,12 @@ def start_race():
 
     pygame.init()
     user1 = User(1, "Pekka Pomo", 1, True)
+    race_data = RaceData(3, True)
 
-    # initialize_data()
-    threading.Thread(target=race_loop, args=(user1, None), daemon=True).start()
+    initialize_data()
+    threading.Thread(
+        target=race_loop, args=(user1, None, race_data), daemon=True
+    ).start()
     input_loop(user1)
 
 

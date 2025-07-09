@@ -2,10 +2,17 @@ import cv2 as cv
 import threading
 import cv2.aruco as aruco
 import numpy as np
+from pathlib import Path
 # from defisheye import Defisheye
 
 line_pos_x = ""
 line_pos_y = ""
+
+
+class RaceData:
+    def __init__(self, laps: int, clockwise: bool):
+        self.laps = laps
+        self.clockwise = clockwise
 
 
 def is_intersecting(mask1, mask2):
@@ -67,7 +74,7 @@ def get_track_mask(image):
     image = cv.cvtColor(image, cv.COLOR_BGR2HSV)
     mask = cv.inRange(image, lower_blue, upper_blue)
     dialite_kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
-    dialated_mask = cv.dilate(red_mask, dialite_kernel, iterations=2)
+    dialated_mask = cv.dilate(mask, dialite_kernel, iterations=2)
     contours, hierarchy = cv.findContours(
         dialated_mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE
     )
@@ -262,7 +269,7 @@ def save_checkpoints():
     cv.imwrite("Track data/checkpoint2.jpg", checkpoint2)
 
 
-def race_loop(player1, player2=None):
+def race_loop(player1, player2=None, race_data=RaceData(1, False)):
     from race_main import set_user_intersection
 
     users = [player1]
@@ -291,6 +298,8 @@ def race_loop(player1, player2=None):
         checkpoint2,
         line,
     ]
+    if race_data.clockwise:
+        checkpoints.reverse()
 
     aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_APRILTAG_25H9)
     parameters = cv.aruco.DetectorParameters()
@@ -334,7 +343,10 @@ def race_loop(player1, player2=None):
             ):
                 user.nextCheckpointIndex += 1
             if user.nextCheckpointIndex >= len(checkpoints):
-                user.completedRace = True
+                user.lapsCompleted += 1
+                user.nextCheckpointIndex = 1
+                if user.lapsCompleted == race_data.laps:
+                    user.completedRace = True
 
         cv.imshow("Frame", last_car)
         # Exit on 'q' key press
@@ -351,12 +363,19 @@ def save_track_data():
 
 
 def initialize_data():
+    TRACK_PATH = "Track data/track_mask.jpg"
+    FINISHLINE_PATH = "Track data/finishline_mask.jpg"
+
     video = cv.VideoCapture(1)
     ret, frame = video.read()
-    track_mask = get_track_mask(frame)
-    cv.imwrite("Track data/track_mask.jpg", track_mask)
-    line = get_finishline(frame)
-    cv.imwrite("Track data/finishline_mask.jpg", line)
+    if not Path(TRACK_PATH).exists():
+        track_mask = get_track_mask(frame)
+        cv.imwrite(TRACK_PATH, track_mask)
+    if not Path(FINISHLINE_PATH).exists():
+        line = get_finishline(frame)
+        cv.imwrite(FINISHLINE_PATH, line)
+    if Path(TRACK_PATH).exists() and Path(FINISHLINE_PATH).exists():
+        save_checkpoints()
     cv.imwrite("Track data/reference.jpg", frame)
     save_checkpoints()
 
