@@ -2,7 +2,9 @@ import cv2 as cv
 import threading
 import cv2.aruco as aruco
 import numpy as np
+import json
 from pathlib import Path
+import math
 # from defisheye import Defisheye
 
 line_pos_x = ""
@@ -17,6 +19,33 @@ class RaceData:
 
 def is_intersecting(mask1, mask2):
     return cv.countNonZero(cv.bitwise_and(mask1, mask2)) > 0
+
+
+def car_pos(car_mask):
+    moment = cv.moments(car_mask)
+    cx = int(moment["m10"] / moment["m00"])
+    cy = int(moment["m01"] / moment["m00"])
+    return cx, cy
+
+
+def car_direction(corners):
+    if corners:
+        for i, corner in enumerate(corners):
+            p1 = corner[0][0]
+            p2 = corner[0][1]
+            dx = p2[0] - p1[0]
+            dy = p2[1] - p1[1]
+            angle = math.degrees(math.atan2(dy, dx))
+            return angle
+
+
+def checkpoint_positions(checkpoint_mask):
+    order = []
+    pass
+
+
+def checkpoint_position(checkpoint, x_pos, y_pos):
+    pass
 
 
 def get_line_orientation(line):
@@ -115,6 +144,12 @@ def get_finishline(img):
     global line_pos_y
     line_pos_x = white_pixels_side(mask, axis="x")
     line_pos_y = white_pixels_side(mask, axis="y")
+
+    data = {"line_x": line_pos_x, "line_y": line_pos_y}
+    if Path("Track data/line_data.json").exists():
+        with open("Track data/line_data.json", "w") as f:
+            json.dump(data, f, indent=4)
+
     track = cv.imread("Track data/track_mask.jpg", cv.IMREAD_GRAYSCALE)
     ys, xs = np.where(track == 255)
 
@@ -325,11 +360,16 @@ def race_loop(player1, player2=None, race_data=RaceData(1, False)):
             if ids is not None:
                 for i, marker_id in enumerate(ids.flatten()):
                     if marker_id == user.arucoID:
+                        if not user.is_player:
+                            dir = car_direction(corners)
                         pts = corners[i][0].astype(np.int32)
                         cv.fillConvexPoly(mask, pts, (255, 255, 255))
 
                 kernel = np.ones((9, 9), np.uint8)
                 mask = cv.dilate(mask, kernel, iterations=2)
+
+                dir = car_pos(mask)
+                print(dir)
 
             if cv.countNonZero(mask) > 0:
                 last_car = mask
@@ -381,6 +421,9 @@ def initialize_data():
 
 
 if __name__ == "__main__":
-    save_track_data()
+    track = cv.imread("Track data/track_mask.jpg", cv.IMREAD_GRAYSCALE)
+    track = cv.resize(track, (128, 96))
+    cv.imwrite("Track data/map.jpg", track)
+    # save_track_data()
     # user1 = User(pygame.joystick.Joystick(0), "Player 1")
     # race_loop(user1, None)

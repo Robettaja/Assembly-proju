@@ -49,6 +49,7 @@ class User:
         self.id = player_number
         self.arucoID = arucoID
         self.raceTime = 0
+        self.is_player = is_player
         self.completedRace = False
         self.nextCheckpointIndex = 0
         self.lapsCompleted = 0
@@ -139,7 +140,7 @@ def start_race():
     from track_vision import race_loop, initialize_data
 
     pygame.init()
-    user1 = User(1, "Pekka Pomo", 1, True)
+    user1 = User(1, "Pekka Pomo", 1, False)
     race_data = RaceData(3, True)
 
     initialize_data()
