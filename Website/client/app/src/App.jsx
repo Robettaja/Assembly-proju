@@ -261,166 +261,164 @@ function App() {
         <video autoPlay muted loop playsInline className= "background-video-blur blur-sm w-100">
           <source src="/videos/driftingcar.mp4" type= "video/mp4"/>
         </video>
-  <Router>
-    <div>
-        <div className="nav-bar">
-          <button
-              onClick={() => {
-                setActiveMenu(!activeMenu);
-              }}
-              className={`hamburger-menu ${activeMenu && "active"}`}
-                  
-              >
-                  <span></span>
-                  <span></span>
-                  <span></span>
-            </button>
-
-            
-            <div className={`${activeMenu ? "right-0" : "right-full"}
-               h-screen w-full max-w-[400px] bg-zinc-800 absolute top-0 duration-500`}
-              >
-               <ul>
-                      <li><Link to="/">Home</Link></li>
-                      <li><Link to ="/users">Users</Link></li>
-                      <li><Link to="/leaderboard">Leaderboard</Link></li>
-              </ul>
-            
-            
-              {activeMenu && (
-                  <div className="menu">
-                     
-
-                  </div>
-              )}
-              </div>
-        </div>
-      <Routes>
-        <Route path="/" element={
-
-          
+    <Router>
         <div>
-
-
-      <div className="video-background-container">
-        <video autoPlay muted loop playsInline className="background-video">
-          <source src="/videos/driftingcar.mp4" type= "video/mp4"/>
-        </video>
-
-
-      <div className = "race">
-      
-          {!submitted ? (
-            <div className="input-form">
-              
-              <form onSubmit = {handleSubmit}>
-             
-              <div className="flex flex-col md:flex-row gap-8 items-center justify-center w-full">
-                <div className="input-container">
-                  <label>
-                    <p className="font-bold uppercase ">Player 1:</p>
-                    <input
-                      type ="text"
-                      value={username1}
-                      onChange={(e) => setUsername1(e.target.value)}
-                      required
-                    />
-                  </label>
-                </div>
-                
-                <div className="input-container">
-                  <label>
-                    <p className="font-bold uppercase ">Player 2:</p>
-                    <input
-                      type ="text"
-                      value={username2}
-                      onChange={(e) => setUsername2(e.target.value)}
-                      required
-                      />
-                  </label>
-                </div>
-                </div>
-                <div className="button-row">
-                <button type="submit">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                  Start race
-                </button>
-                </div>
-                <div className = "Hamk-logo-container">
-                    <img src="/images/HAMK_Logo_horizontal_NEGA.png" alt="Hamk Logo"/>
-                </div>
-            </form>
-            
-          </div>
-          
-        ) : (
-          
-          <>
-            <div className= "display-container">
-              <Countdown
-                onTimeUpdated = {(ms) => setElapsedTime(ms)}/>
-
-              <div className="flex flex-col md:flex-row justify-around gap-8">
-                {[{name: username1, id: userIds[0], laps: laps1, setLaps: setLaps1},
-                { name: username2, id: userIds[1], laps: laps2, setLaps: setLaps2}]
-                .map((user, idx) => (
-                  <div key = {idx} className="flex flex-col items-center">
-                    <h3>{user.name}</h3>
-
-
-                  <button
-                  className ="button-lap"
-                  disabled={user.laps.length >= 3}
-                    onClick={() => {
-                      const formatted = formatElapsed(elapsedTime);
-                      const index = user.laps.length;
-
-                      saveLapTime(user.id, index, formatted).then(() => {
-                        user.setLaps((prev) => [...prev, formatted]);
-
-                        if (index === 2) {
-                          const total = totalTime([...user.laps, formatted]);
-                          saveTotalTime(user.id, total).then(fetchUsernames);
-                        }
-                      });
-                    }}      
+            <div className="nav-bar">
+              <button
+                  onClick={() => {
+                    setActiveMenu(!activeMenu);
+                  }}
+                  className={`hamburger-menu ${activeMenu && "active"}`}
+                      
                   >
-              laptime
-            </button>
-                
-                <div className = "text-sm text-gray-700 text-center mt-2">
-                  kierrokset: {user.laps.join(", ")} <br/>
-                  yhteensä: {totalTime(user.laps)}
-                </div>
-                  </div>
-                ))} 
-                </div>
-              </div>
-                
-
-                <button onClick={() => {
-                  setSubmitted(false)
-                  setUser("");
-                  reset();
-                
-                }} id="back-arrow">
-                  <VscArrowLeft />
+                      <span></span>
+                      <span></span>
+                      <span></span>
                 </button>
-            </>
-       
-        
-      )}
 
-      <div className="footer absolute bottom-0 left-0 w-full p-4 text-center text-gray-400 text-sm z-20">
-        <p>© 2025 Saija Joronen. All rights reserved.</p>
-      </div>
-    </div>
+                
+                <div className={`${activeMenu ? "right-0" : "right-full"}
+                  h-screen w-full max-w-[400px] bg-zinc-800 absolute top-0 duration-500`}
+                  >
+                  <ul>
+                          <li><Link to="/">Home</Link></li>
+                          <li><Link to ="/users">Users</Link></li>
+                          <li><Link to="/leaderboard">Leaderboard</Link></li>
+                  </ul>
+                
+                
+                  {activeMenu && (
+                      <div className="menu">
+                        
+
+                      </div>
+                  )}
+                  </div>
+            </div>
+        </div>    
+      <Routes>
+          <Route path="/" element={
+
+        <div>
+          <div className="video-background-container">
+            <video autoPlay muted loop playsInline className="background-video">
+              <source src="/videos/driftingcar.mp4" type= "video/mp4"/>
+            </video>
 
 
-         
+              <div className = "race">
+              
+                  {!submitted ? (
+                    <div className="input-form">
+                      
+                      <form onSubmit = {handleSubmit}>
+                      
+                        <div className="flex flex-col md:flex-row gap-8 items-center justify-center w-full">
+                          <div className="input-container">
+                            <label>
+                              <p className="font-bold uppercase ">Player 1:</p>
+                              <input
+                                type ="text"
+                                value={username1}
+                                onChange={(e) => setUsername1(e.target.value)}
+                                required
+                              />
+                            </label>
+                          </div>
+                          
+                          <div className="input-container">
+                            <label>
+                              <p className="font-bold uppercase ">Player 2:</p>
+                              <input
+                                type ="text"
+                                value={username2}
+                                onChange={(e) => setUsername2(e.target.value)}
+                                required
+                                />
+                            </label>
+                          </div>
+                        </div>
+
+                        <div className="button-row">
+                          <button type="submit">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                            Start race
+                          </button>
+                        </div>
+
+                        <div className = "Hamk-logo-container">
+                              <img src="/images/HAMK_Logo_horizontal_NEGA.png" alt="Hamk Logo"/>
+                        </div>
+                      </form>
+                    
+                    </div>
+                  
+                    ) : (
+                  
+                    <>
+                        <div className= "display-container">
+                          <Countdown
+                            onTimeUpdated = {(ms) => setElapsedTime(ms)}/>
+
+                              <div className="flex flex-col md:flex-row justify-around gap-8">
+                                {[{name: username1, id: userIds[0], laps: laps1, setLaps: setLaps1},
+                                { name: username2, id: userIds[1], laps: laps2, setLaps: setLaps2}]
+                                .map((user, idx) => (
+                                  <div key = {idx} className="flex flex-col items-center">
+                                    <h3>{user.name}</h3>
+
+
+                                      <button
+                                        className ="button-lap"
+                                        disabled={user.laps.length >= 3}
+                                          onClick={() => {
+                                            const formatted = formatElapsed(elapsedTime);
+                                            const index = user.laps.length;
+
+                                            saveLapTime(user.id, index, formatted).then(() => {
+                                              user.setLaps((prev) => [...prev, formatted]);
+
+                                              if (index === 2) {
+                                                const total = totalTime([...user.laps, formatted]);
+                                                saveTotalTime(user.id, total).then(fetchUsernames);
+                                              }
+                                            });
+                                          }}      
+                                        >
+                                        laptime
+                                      </button>
+                                
+                                    <div className = "text-sm text-gray-700 text-center mt-2">
+                                      kierrokset: {user.laps.join(", ")} <br/>
+                                      yhteensä: {totalTime(user.laps)}
+                                    </div>
+                                  </div>
+                                ))} 
+                              </div>
+                      </div>
+                        
+
+                        <button onClick={() => {
+                          setSubmitted(false)
+                          setUser("");
+                          reset();
+                        
+                        }} id="back-arrow">
+                          <VscArrowLeft />
+                        </button>
+                    </>
+                )}
+              </div>
+                <div className="footer absolute bottom-0 left-0 w-full p-4 text-center text-gray-400 text-sm z-20">
+                  <p>© 2025 Saija Joronen. All rights reserved.</p>
+                </div>
+          </div>  
+        </div>
+        }/>
+
         <Route path="/users" element={
           <Users
             usernames = {usernames}
@@ -431,17 +429,15 @@ function App() {
         <Route path="/leaderboard" element={
           <Leaderboard usernames = {usernames} />
         } />
-        
-      </Routes>
           
+      </Routes>
+            
 
-
-</Router>
+    
+    </Router>
+  </div>
 </div>
-
-</div>
-</>
-  );
+);
 }
 
 export default App;
