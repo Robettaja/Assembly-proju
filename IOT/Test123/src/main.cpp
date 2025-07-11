@@ -8,13 +8,19 @@ void carControls();
 WiFiUDP Udp;
 Servo servo;
 
-const char *ssid = "Roope";
-const char *pass = "12345678";
+const char *ssid = "HAMKvisitor";
+const char *pass = "hamkvisitor";
+
+unsigned long lastPacketMils = 0;
+
+float i0 = 0;
+float i1 = 0;
 
 unsigned int port = 420;
 char packetBuffer[255];
 
-void setup() {
+void setup()
+{
   Serial.begin(9600);
   while (!Serial)
     ;
@@ -26,10 +32,12 @@ void setup() {
   analogWrite(LED_BUILTIN, 255);
   bool isConnected = false;
 
-  while (!isConnected) {
+  while (!isConnected)
+  {
 
     WiFi.begin(ssid, pass); // Start connecting to WiFi
-    while (WiFi.status() != WL_CONNECTED) {
+    while (WiFi.status() != WL_CONNECTED)
+    {
       delay(100);
     }
     isConnected = true;
@@ -44,64 +52,83 @@ void setup() {
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
 
-  if (!Udp.begin(port)) {
+  if (!Udp.begin(port))
+  {
     Serial.println("UDP port 420 start failed");
     while (1)
       ;
+    lastPacketMils = millis();
   }
 }
-void loop() {
+void loop()
+{
 
   int packetSize = Udp.parsePacket();
-  if (packetSize > 8) {
-    sendIP(packetSize);
-  } else if (packetSize == 8) {
-    carControls();
-  }
+    if (packetSize > 8)
+    {
+      sendIP(packetSize);
+    }
+    else if (packetSize == 8)
+    {
+      carControls();
+    }
 }
-void carControls() {
+void carControls()
+{
 
   char buf[8];
-  float i0;
-  float i1;
   Udp.read(buf, 8);
   memcpy(&i0, buf, 4);
   memcpy(&i1, buf + 4, 4);
   int hForce = i1 * 255;
-  if (i0 > 0.05) {
+  if (i0 > 0.05)
+  {
+
     Serial.println(i0);
     analogWrite(LED_BUILTIN, 255);
     int rotationAmount = 98 - (i0 * 45);
 
     servo.write(rotationAmount);
-  } else if (i0 < -0.05) {
+  }
+  else if (i0 < -0.05)
+  {
     int rotationAmount = 98 + (i0 * 45 * -1);
     servo.write(rotationAmount);
-  } else {
+  }
+  else
+  {
     servo.write(98);
 
     analogWrite(LED_BUILTIN, 0);
   }
-  if (i1 > 0.05) {
+  if (i1 > 0.05)
+  {
+    Serial.println("f");
 
     analogWrite(9, hForce);
-    digitalWrite(8, HIGH);
-  } else if (i1 < -0.05) {
+    digitalWrite(8, LOW);
+  }
+  else if (i1 < -0.05)
+  {
 
     analogWrite(9, hForce * -1);
-    digitalWrite(8, LOW);
-  } else {
+    digitalWrite(8, HIGH);
+  }
+  else
+  {
     analogWrite(9, 0);
     digitalWrite(8, LOW);
   }
 }
 
-void sendIP(int packetSize) {
+void sendIP(int packetSize)
+{
   char buf[32];
   Udp.read(buf, 32);
   buf[packetSize] = '\0';
 
-  if (strcmp(buf, "DISCOVER_ARDUINO") == 0) {
+  if (strcmp(buf, "DISCOVER_ARDUINO") == 0)
+  {
     Serial.println(Udp.remoteIP());
     IPAddress ip = WiFi.localIP();
     Udp.beginPacket(Udp.remoteIP(), 1420);

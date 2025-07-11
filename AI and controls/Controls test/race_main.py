@@ -115,6 +115,7 @@ def input_loop(player1, player2=None):
                 targetX = user.controller.get_axis(3) * user.speed
                 currentX = move_towards_target(currentX, targetX, 0.01, dt)
                 currentY = move_towards_target(currentY, targetY, 0.5, dt)
+                print(currentX, currentY)
                 if user.ip != "0.0.0.0":
                     data = struct.pack("ff", currentX, currentY)
                     if data:
@@ -140,13 +141,13 @@ def start_race():
     from track_vision import race_loop, initialize_data
 
     pygame.init()
-    user1 = User(1, "Pekka Pomo", 1, False)
+    user1 = User(1, "Pekka Pomo", 1, True)
     race_data = RaceData(3, True)
 
-    initialize_data()
-    threading.Thread(
-        target=race_loop, args=(user1, None, race_data), daemon=True
-    ).start()
+    # initialize_data()
+    # threading.Thread(
+    #     target=race_loop, args=(user1, None, race_data), daemon=True
+    # ).start()
     input_loop(user1)
 
 
