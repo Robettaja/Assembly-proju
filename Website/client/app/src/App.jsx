@@ -18,15 +18,16 @@ function App() {
   const [username2, setUsername2] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [time, setTime] = useState('');
-  const [laps1, setLaps1] = useState([]);
-  const [laps2, setLaps2] = useState([]);
+
   const [userIds, setUserIds] = useState([]);
   const [isRunning, setIsRunning] = useState(false);
-  const [laps, setLaps] = useState([]);
+  const [laps, setLaps] = useState([[], []]);
+  const [totalTimes, setTotalTimes] = useState({user1: "", user2: ""});
+
   const [elapsedTime, setElapsedTime] = useState(0);
   const intervalIdRef = useRef(null);
   const startTimeRef = useRef(0);
-  const [lastUserId, setLastUserId] = useState(null);
+
   const [activeMenu, setActiveMenu] = useState(false);
 
 
@@ -64,16 +65,15 @@ function App() {
       if (!response.ok) {
         const errorText = await response.text();
         console.error("Backend error:", response.status, errorText);
-        return;
+        return [];
       }
 
       const data = await response.json();
       setUsernames((prev) => [...prev, ...data]);
-      console.log("Usernames added:", data);
       return data;
-
     } catch (err) {
       console.log("Fetch error:", err);
+      return [];
     }
     
   };
@@ -104,17 +104,45 @@ function App() {
     if (username2.trim() !== "") usersToAdd.push({ user: username2 }); 
 
     const addedUsers = await addUser(usersToAdd);
-    if (addedUsers) {
+    if (addedUsers && addedUsers.length > 0) {
       setUserIds(addedUsers.map(u => u.id))
+      setSubmitted(true);
+      setUsername1(""); 
+      setUsername2("");
+      const now = new Date();
+      const formattedTime = now.toLocaleDateString();
+      setTime(formattedTime);
+    } else
+    {
+      alert("Failed to add users. Please try again.");
     }
-    setSubmitted(true);
-    const now = new Date();
-    const formattedTime = now.toLocaleDateString();
-    setTime(formattedTime);
+    
+  };
+
+  const handleLap = (userIndex, lapTime) => {
+    const userId = userIds[userIndex];
+    const currentLaps = laps[userIndex] || [];
+
+    const lapIndex = currentLaps.length;
+    saveLapTime(userId, lapIndex, lapTime);
+
+    const updatedLaps = [...laps];
+    updatedLaps[userIndex] = [...currentLaps, lapTime];
+    setLaps(updatedLaps);
+  };
 
 
-   
-  } 
+  const handleFinish = (results) => {
+    console.log("Race finished!");
+    console.log("User 1 total time:", results.user1);
+    console.log("User 2 total time:", results.user2);
+
+    saveTotalTime(userIds[0], results.user1);
+    saveTotalTime(userIds[1], results.user2);
+
+    setTotalTimes(results);
+  };
+
   
 
       useEffect(() => {
@@ -160,16 +188,18 @@ function App() {
     };
 
     const saveTotalTime = (userId, total) => {
-          return fetch(`http://127.0.0.1:8000/api/usernames/${userId}/`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                total_time: total,
-            }),
-          });
-        };
+        return fetch(`http://127.0.0.1:8000/api/usernames/${userId}/`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            total_time: total,
+        }),
+        });
+    };
+
+
 
         
     const formatElapsed = (ms) => {
@@ -181,79 +211,7 @@ function App() {
     
 
 
-      /*
-      function formatTime(){
-
-        let hours = Math.floor(elapsedTime / (1000 * 60 * 60));
-        let minutes = Math.floor(elapsedTime / (1000 * 60) % 60);
-        let seconds = Math.floor(elapsedTime / (1000) % 60);
-        let milliseconds = Math.floor(elapsedTime % 1000 / 10);
-        
-        hours = String(hours).padStart(2, "0");
-        minutes = String(minutes).padStart(2, "0");
-        seconds = String(seconds).padStart(2, "0");
-        milliseconds = String(milliseconds).padStart(2, "0");
-        return `${hours}:${minutes}:${seconds}:${milliseconds}`;
-  
-      }
-
-      const handleLap1 = () => {
-        if (laps1.length < 3) setLaps1([...laps1, formatTime()]);
-      };
-
-      const handleLap2 = () => {
-        if (laps2.length < 3) setLaps2([...laps2, formatTime()]);
-      };
-
-      const totalTime = (laps) => {
-        const toMs = (str) => {
-          const [h, m, s, ms] = str.split(":").map(Number);
-          return h * 3600000 + m * 60000 + s * 1000 + ms * 10;
-        };
-
-        const sum = laps.reduce((acc, lap) => acc + toMs(lap), 0);
-        if (laps. length === 3) {
-          let hours = Math.floor(sum / (1000 * 60 * 60));
-          let minutes = Math.floor((sum / (1000 * 60)) % 60);
-          let seconds = Math.floor((sum / 1000) % 60);
-          let milliseconds = Math.floor((sum % 1000) / 10);
-          hours = String(hours).padStart(2, "0");
-          minutes = String(minutes).padStart(2, "0");
-          seconds = String(seconds).padStart(2, "0");
-          milliseconds = String(milliseconds).padStart(2, "0");
-          return `${hours}:${minutes}:${seconds}:${milliseconds}`;
-          }
-          return "";
-        };
-
-
-  useEffect(() => {
-    if (laps1.length === 3 && userIds[0]) {
-      const total = totalTime(laps1);
-      fetch(`http://127.0.0.1:8000/api/usernames/${userIds[0]}/`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ total_time: total }),
-      }).then(fetchUsernames);
-    }
-  }, [laps1, userIds]);
-  
-  useEffect(() => {
-    if (laps2.length === 3 && userIds[1]) {
-      const total = totalTime(laps2);
-      fetch(`http://127.0.0.1:8000/api/usernames/${userIds[1]}/`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ total_time: total }),
-      }).then(fetchUsernames);
-      }
-  }, [laps2, userIds]);
-  */
-
+      
   return (
 
 <div className = "App">
@@ -361,44 +319,20 @@ function App() {
                     <>
                         <div className= "display-container">
                           <Countdown
-                            onTimeUpdated = {(ms) => setElapsedTime(ms)}/>
+                            onFinish={handleFinish} onLap={(userIndex, lapTime) => handleLap(userIndex, lapTime)}/>
 
-                              <div className="flex flex-col md:flex-row justify-around gap-8">
-                                {[{name: username1, id: userIds[0], laps: laps1, setLaps: setLaps1},
-                                { name: username2, id: userIds[1], laps: laps2, setLaps: setLaps2}]
-                                .map((user, idx) => (
-                                  <div key = {idx} className="flex flex-col items-center">
-                                    <h3>{user.name}</h3>
+                            <div className="text-sm text-gray-700 text-center mt-2">
+                                kierrokset: {laps[0].join(", ")} <br/>
+                                Yhteensä: {totalTime.user1}
+                            </div>
 
+                            <div className="text-sm text-gray-700 text-center mt-2">
+                                kierrokset: {laps[1].join(", ")} <br/>
+                                Yhteensä: {totalTime.user2}
+                            </div>
 
-                                      <button
-                                        className ="button-lap"
-                                        disabled={user.laps.length >= 3}
-                                          onClick={() => {
-                                            const formatted = formatElapsed(elapsedTime);
-                                            const index = user.laps.length;
-
-                                            saveLapTime(user.id, index, formatted).then(() => {
-                                              user.setLaps((prev) => [...prev, formatted]);
-
-                                              if (index === 2) {
-                                                const total = totalTime([...user.laps, formatted]);
-                                                saveTotalTime(user.id, total).then(fetchUsernames);
-                                              }
-                                            });
-                                          }}      
-                                        >
-                                        laptime
-                                      </button>
-                                
-                                    <div className = "text-sm text-gray-700 text-center mt-2">
-                                      kierrokset: {user.laps.join(", ")} <br/>
-                                      yhteensä: {totalTime(user.laps)}
-                                    </div>
-                                  </div>
-                                ))} 
-                              </div>
-                      </div>
+                        </div>
+                        
                         
 
                         <button onClick={() => {
@@ -412,10 +346,11 @@ function App() {
                     </>
                 )}
               </div>
-                <div className="footer absolute bottom-0 left-0 w-full p-4 text-center text-gray-400 text-sm z-20">
+                
+          </div>  
+          <div className="footer absolute bottom-0 left-0 w-full p-4 text-center text-gray-400 text-sm z-20">
                   <p>© 2025 Saija Joronen. All rights reserved.</p>
                 </div>
-          </div>  
         </div>
         }/>
 

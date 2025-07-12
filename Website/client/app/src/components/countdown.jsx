@@ -7,21 +7,28 @@ const Countdown = ({onLap, onFinish}) => {
     const [countdownTime, setCountdownTime] = useState(10);
     const [timerRunning, setTimerRunning] = useState(false);
     const [elapsedTime, setElapsedTime] = useState(0);
-    const [laps, setLaps] = useState([]);
 
+    const [user1Laps, setUser1Laps] = useState([]);
+    const [user2Laps, setUser2Laps] = useState([]);
+    
     const countdownRef = useRef(null);
     const timerIntervalRef = useRef(null);
     const startTimeRef = useRef(null);
-
-    const formatCountdown = (seconds) => {
-        return String(seconds % 60).padStart(2, "0");
-    };
 
     const formatElapsed = (ms) => {
         const minutes = String(Math.floor(ms / 60000) % 60).padStart(2, "0");
         const seconds = String(Math.floor(ms / 1000) % 60).padStart(2, "0");
         const milliseconds = String(Math.floor((ms % 1000) / 10)).padStart(2, "0");
         return `${minutes}:${seconds}:${milliseconds}`;
+    };
+
+    const totalTime = (lapsArray) => {
+        let totalMs = 0;
+        lapsArray.forEach(time => {
+            const [min, sec, ms] = time.split(':').map(Number);
+            totalMs += min * 60000 + sec * 1000 + ms * 10;
+        });
+        return formatElapsed(totalMs);
     };
     
     useEffect(() => {
@@ -50,22 +57,49 @@ const Countdown = ({onLap, onFinish}) => {
             
      }, [timerRunning]);
 
-     const handleLap = () => {
+    const handleLap = (userIndex) => {
         const lapTime = formatElapsed(elapsedTime);
-        const updatedLaps = [...laps, lapTime];
-        setLaps(updatedLaps);
 
-        if (onLap) onLap(lapTime);
+        if (userIndex === 0 && user1Laps.length < 3) {
+            const updated = [...user1Laps, lapTime];
+            setUser1Laps(updated);
+            onLap && onLap(0, lapTime);
+        }
 
-        if (updatedLaps.length === 3) {
-            clearInterval(timerIntervalRef.current);
-            setTimerRunning(false);
+        if (
+            userIndex === 0 &&
+            updated.length === 3 &&
+            user2Laps.length === 3 &&
+            onFinish
+        ) {
+            onFinish({
+                user1: totalTime(updated),
+                user2: totalTime(user2Laps)
+            })
+        }
 
-            const total = totalTime(updatedLaps);
-            if (onFinish) onFinish(total);
+        if (userIndex === 1 && user2Laps.length < 3) {
+            const updated = [...user2Laps, lapTime];
+            setUser2Laps(updated);
+            onLap && onLap(1, lapTime);
+        }
+
+        if (
+            updated.length === 3 &&
+            user1Laps.length === 3 &&
+            onFinish
+        ) {
+            onFinish({
+                user1: totalTime(user1Laps),
+                user2: totalTime(updated)
+            })
         }
     };
+        
 
+ 
+
+    
 
 
 
@@ -73,31 +107,60 @@ const Countdown = ({onLap, onFinish}) => {
 
 
     return (
-    <div className="">
-    
-        <h2>Countdown</h2>
-        <div className="w-100 flex flex-row justify-center mx-auto">
-             <div className="countdown-box">
-                <div className="countdown-value">
-                    {!timerRunning ? (
-                        <h2>{formatCountdown(countdownTime)}</h2>
-                    ) : (
-                        <h2>{formatElapsed(elapsedTime)}</h2>
-                    )}
-                    
-                </div>
-            </div>   
-        </div>
+        <div className="p4 text-center">
+        
+            <h2 className="text-x1 mb-2">Countdown / Timer</h2>
+            <div className="text-4x1 font-bold mb-4">
+                {countdownTime > 0 ? countdownTime : formatElapsed(elapsedTime)}
+            </div>
 
-        {timerRunning && (
-            <div className = "flex flex-col items-center mt-4 gap-2">
-                <button onClick = {handleLap} className="button-lap">
-                laptime
-                </button>
+            {countdownTime === 0 && timerRunning && (
+                <div className="flex justify-center gap-6">
+                    <div>
+                        <h3 className="text-x1 mb-2"> User 1</h3>
+                
+                        <button
+                            onClick={() => handleLap(0)}
+                            disabled={user1Laps.length >= 3}
+                            className="bg-blue-500 text-white px-4 py-2 rounded mb-2"
+                            >
+                            Lap
+                        </button>
+                    
+                        <h3>Laps:</h3>
+                        <ul>
+                            {user1Laps.map((lap, i) => (
+                                <li key = {i}>{lap}</li>
+                            ))}
+                        </ul>
+                    
+                    </div>
+
+                    <div>
+                        <h3 className="text-x1 mb-2"> User 2</h3>
+                        <button 
+                            onClick={() => handleLap(1)}
+                            disabled={user2Laps.length >= 3}
+                            className="bg-green-500 text-white px-4 py-2 rounded mb-2"
+                            >
+                            Lap
+                        </button>
+
+                        <h3>Laps: </h3>
+                        <ul>
+                            {user2Laps.map((lap, i) => (
+                                <li key = {i}> {lap} </li>
+                        ))}    
+                        </ul>    
+
+                        
+                    </div>
                 </div>
-        )}
-    </div>
-    );
-};
+            )}
+
+           
+        </div>
+        );
+    };
 
 export default Countdown;
