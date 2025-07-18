@@ -1,34 +1,26 @@
-import pygame
+import asyncio
 import threading
-import serial
-import socket
+import keyboard
 import struct
-import time
-from getip import discover_arduinos
-from dotenv import load_dotenv
-import os
+from bleak import BleakClient, BleakScanner
+from bleak.backends.winrt.client import BleakClientWinRT
+
+import pygame
 
 intersections = [True, True]
 frame_lock = threading.Lock()
+
+frame_lock = threading.Lock()
+controller_inputs = {}
+controller_locks = {}
+users = []
+
+PLAYER_DEVICE_MAP = {}
 
 
 def set_user_intersection(index, value):
     with frame_lock:
         intersections[index] = value
-
-
-def move_towards_target(current, target, speed, dt):
-    if current > 0 and target < 0 or current < 0 and target > 0:
-        speed /= 1.5
-    if current < target:
-        current += dt / speed
-        if current > target:
-            current = target
-    elif current > target:
-        current -= dt / speed
-        if current < target:
-            current = target
-    return current
 
 
 class RaceData:
@@ -45,8 +37,7 @@ class User:
         arucoID: int,  # Mitä autoa pelaaja ohjaa (määritetään myöhemmin)
         is_player: bool = True,  # Onko pelaaja vai tekoäly Vain pelaaja 2 kohdalla mahdollinen valita
     ):
-        load_dotenv("ipdata.env")
-        self.id = player_number
+        self.player_number = player_number
         self.arucoID = arucoID
         self.raceTime = 0
         self.is_player = is_player
@@ -55,100 +46,127 @@ class User:
         self.lapsCompleted = 0
         self.name = name
         self.speed = 1.0
-        if not is_player:
-            self.ip = os.getenv("AI_IP")
-        else:
-            self.ip = os.getenv("IP" + str(arucoID))
-            self.is_player = is_player
-            joystick = pygame.joystick.Joystick(player_number - 1)
-            joystick.init()
-
-            print("Connected to controller:", joystick.get_name(), joystick.get_guid())
-            self.controller = joystick
+        self.controller_id = player_number - 1
 
         def __hash__(self):
             return hash((self.id, self.name))
 
 
-def input_loop(player1, player2=None):
-    discover_arduinos()
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    sock.setblocking(False)
-
-    clock = pygame.time.Clock()
-
+def check_controllers():
+    pygame.init()
     pygame.joystick.init()
+    all_connected = True
 
-    if pygame.joystick.get_count() == 0:
-        print("No controller connected.")
-        exit()
+    for player in users:
+        if pygame.joystick.get_count() <= player.controller_id:
+            print(
+                f"\033[91m[ERROR] Controller not found for player {player.name} (Controller ID: {player.controller_id})\033[0m"
+            )
+            all_connected = False
 
-    users = [player1]
+    pygame.quit()
+    return all_connected
 
-    if player2:
-        users.append(player2)
 
-    PORT = 420
-
-    currentX = 0.0
-    currentY = 0.0
-
+def py_thread():
+    pygame.init()
+    pygame.joystick.init()
+    joystics = []
+    for player in users:
+        if pygame.joystick.get_count() <= player.controller_id:
+            print("\033[91mController not found for player", player.name, "\033[0m")
+        joystick = pygame.joystick.Joystick(player.controller_id)
+        joystick.init()
+        joystics.append(joystick)
     try:
         while True:
-            dt = clock.tick(60) / 1000.0
-            pygame.event.pump()
-            for user in users:
-                if not user.completedRace:
-                    user.raceTime += dt
-                else:
-                    continue
-
-                if not intersections[user.id]:
-                    user.speed -= 0.1 * dt
-                    if user.speed < 0.1:
-                        user.speed = 0.1
-                else:
-                    user.speed = 1.0
-
-                targetY = -user.controller.get_axis(1) * user.speed
-                targetX = user.controller.get_axis(3) * user.speed
-                currentX = move_towards_target(currentX, targetX, 0.01, dt)
-                currentY = move_towards_target(currentY, targetY, 0.5, dt)
-                print(currentX, currentY)
-                if user.ip != "0.0.0.0":
-                    data = struct.pack("ff", currentX, currentY)
-                    if data:
-                        sock.sendto(data, (user.ip, PORT))
-            if all(user.completedRace for user in users):
-                print(f"{users[0].name} won")
-                break
-            clock.tick(60)
+            for player in users:
+                pygame.event.pump()
+                joystick = joystics[player.controller_id]
+                x = joystick.get_axis(0) * player.speed
+                y = -joystick.get_axis(3) * player.speed
+                with controller_locks[player.player_number]:
+                    controller_inputs[player.player_number] = (x, y)
 
     except KeyboardInterrupt:
-        print("Exiting...")
+        print("\nExiting...")
     finally:
         pygame.quit()
 
-    pygame.quit()
-    data = struct.pack("ff", 0, 0)
-    for user in users:
-        if data:
-            sock.sendto(data, (user.ip, PORT))
+
+CHAR_UUID = "abcdefab-cdef-1234-5678-abcdefabcdef"
+DEVICES = []
+
+
+async def handle_device(device, player_number):
+    async with BleakClient(device.address) as client:
+        print(f"[{device.name}] Connected to BLE")
+
+        await asyncio.sleep(0.1)  # let connection stabilize
+
+        while True:
+            try:
+                with controller_locks[player_number]:
+                    x, y = controller_inputs.get(player_number, (0.0, 0.0))
+
+                payload = struct.pack("ff", x, y)
+                await client.write_gatt_char(CHAR_UUID, payload, response=False)
+                await asyncio.sleep(1 / 100)
+
+            except Exception as e:
+                print(f"[{device.name}] Error: {e}")
+                await asyncio.sleep(0.05)
+
+
+async def run():
+    global x_input, y_input, frame_lock
+
+    print("Scanning for device...")
+    devices = await BleakScanner.discover()
+    devices = [d for d in devices if d.name in DEVICES]
+
+    if not devices:
+        print("Device not found.")
+        return
+    tasks = []
+    for player_number, device_name in PLAYER_DEVICE_MAP.items():
+        device = next((d for d in devices if d.name == device_name), None)
+        if device:
+            tasks.append(handle_device(device, player_number))
+        else:
+            print(
+                f"\033[91m[P{player_number}] BLE device '{device_name}' not found.\033[0m"
+            )
+            return
+
+    await asyncio.gather(*tasks)
 
 
 def start_race():
     from track_vision import race_loop, initialize_data
 
-    pygame.init()
-    user1 = User(1, "Pekka Pomo", 1, True)
-    race_data = RaceData(3, True)
+    users.append(User(1, "Player1", 1))
+    users.append(User(2, "Player2", 2))
+    race_data = RaceData(laps=1, clockwise=False)
+
+    if not check_controllers():
+        print(
+            "\033[91m[ABORTING] One or more controllers are missing. Race cannot start.\033[0m"
+        )
+        return
+    for i in range(len(users)):
+        controller_locks[i + 1] = threading.Lock()
+        DEVICES.append("CAR" + str(users[i].arucoID))
+        PLAYER_DEVICE_MAP[i + 1] = "CAR" + str(users[i].arucoID)
+    threading.Thread(target=py_thread, daemon=True).start()
+
+    # threading.Thread(
+    #     target=race_loop, args=(users[0], None, race_data), daemon=True
+    # ).start()
+
+    asyncio.run(run())
 
     # initialize_data()
-    # threading.Thread(
-    #     target=race_loop, args=(user1, None, race_data), daemon=True
-    # ).start()
-    input_loop(user1)
 
 
 if __name__ == "__main__":

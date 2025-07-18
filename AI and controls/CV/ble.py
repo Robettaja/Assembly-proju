@@ -8,9 +8,6 @@ from bleak.backends.winrt.client import BleakClientWinRT
 import pygame
 
 frame_lock = threading.Lock()
-x_input = 0
-y_input = 0
-
 controller_inputs = {}
 controller_locks = {}
 users = []
@@ -119,7 +116,7 @@ async def run():
 
 def start_race():
     users.append(User(1, "Player1", 1))
-    # users.append(User(2, "Player2", 2))
+    users.append(User(2, "Player2", 2))
     for i in range(len(users)):
         controller_locks[i + 1] = threading.Lock()
         DEVICES.append("CAR" + str(users[i].arucoID))
