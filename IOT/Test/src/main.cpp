@@ -1,79 +1,134 @@
-#include <Arduino.h>
 #include <ArduinoBLE.h>
+#include <Servo.h>
+
+float moveTowardsTarget(float current, float target, float speed, float dt);
 
 BLEService customService("180C");
-BLECharacteristic rxChar("2A56", BLEWrite | BLERead | BLENotify, 3);
+BLECharacteristic rxChar("2A56", BLEWriteWithoutResponse | BLERead | BLENotify, 8);
 
-void setup() {
-  Serial.begin(115200); // Higher baud rate
-  while (!Serial);
-  
-  if (!BLE.begin()) {
+Servo servo;
+
+const char *carName = "CAR2";
+
+const int ROTATION_AMOUNT = 30;
+const int DEFAULT_ROTATION = 93;
+
+const int MIN_POWER = 20;
+const int MAX_POWER = 32;
+
+const int SERVO_PIN = 10;
+const int MOTOR_DIR_PIN = 11;
+const int MOTOR_POWER_PIN = 12;
+
+void setup()
+{
+  Serial.begin(9600);
+  while (!Serial)
+    ;
+
+  servo.attach(SERVO_PIN);
+  pinMode(MOTOR_DIR_PIN, OUTPUT);
+  pinMode(MOTOR_POWER_PIN, OUTPUT);
+  servo.write(DEFAULT_ROTATION);
+  delay(1000);
+
+  if (!BLE.begin())
+  {
     Serial.println("BLE init failed!");
-    while (1);
+    while (1)
+      ;
   }
-  
-  BLE.setLocalName("BLE_Test");
+
+  BLE.setLocalName(carName);
   BLE.setAdvertisedService(customService);
   customService.addCharacteristic(rxChar);
   BLE.addService(customService);
-  
-  // Set connection parameters for faster communication
-  BLE.setConnectionInterval(6, 12); // 7.5ms to 15ms intervals
-  BLE.setConnectable(true);
-  
-  BLE.advertise();
-  Serial.println("BLE peripheral ready with optimized settings");
-}
 
-void loop() {
+  BLE.advertise();
+  Serial.println("BLE peripheral ready");
+}
+unsigned long lastUpdate = millis();
+
+float currentX = 0;
+float currentY = 0;
+
+void loop()
+{
+
   BLEDevice central = BLE.central();
-  
-  if (central) {
+
+  if (central)
+  {
     Serial.print("Connected to: ");
     Serial.println(central.address());
-    
-    // Request faster connection parameters after connection
-    central.setConnectionInterval(6, 12); // Min 7.5ms, Max 15ms
-    
-    unsigned long lastTime = 0;
-    unsigned long sumElapsed = 0;
-    unsigned int count = 0;
-    unsigned long lastPrintTime = millis();
-    
-    while (central.connected()) {
-      if (rxChar.written()) {
-        unsigned long now = millis();
-        unsigned long elapsed = lastTime ? now - lastTime : 0;
-        lastTime = now;
-        
-        uint8_t payload[3];
-        rxChar.readValue(payload, 3);
-        
-        if (elapsed > 0) {
-          sumElapsed += elapsed;
-          count++;
-        } else {
-          Serial.println(" | First message");
-        }
-        
-        // Print stats every 1 second
-        if (millis() - lastPrintTime >= 1000 && count > 0) {
-          unsigned long averageElapsed = sumElapsed / count;
-          Serial.print("Average: ");
-          Serial.print(averageElapsed);
-          Serial.print(" ms | Count: ");
-          Serial.print(count);
-          Serial.print(" | Rate: ");
-          Serial.print(1000.0 / averageElapsed);
-          Serial.println(" Hz");
-          
-          sumElapsed = 0;
-          count = 0;
-          lastPrintTime = millis();
+
+    while (central.connected())
+    {
+
+      unsigned long currentTime = millis();
+      float deltaTime = (currentTime - lastUpdate) / 1000.0;
+      lastUpdate = currentTime;
+      if (rxChar.written())
+      {
+        if (rxChar.valueLength() == 8)
+        {
+
+          uint8_t payload[8];
+          rxChar.readValue(payload, sizeof(payload));
+
+          float x, y;
+          memcpy(&x, &payload[0], 4);
+          memcpy(&y, &payload[4], 4);
+
+          currentX = x;
+          currentY = moveTowardsTarget(currentY, y, 0.01, deltaTime);
+
+          if (currentX > 0.05)
+          {
+            int rotationAmount = DEFAULT_ROTATION - (fabs(currentX) * ROTATION_AMOUNT);
+
+            servo.write(rotationAmount);
+          }
+          else if (currentX < -0.05)
+          {
+            int rotationAmount = DEFAULT_ROTATION + (fabs(currentX) * ROTATION_AMOUNT);
+            servo.write(rotationAmount);
+          }
+          else
+          {
+            servo.write(DEFAULT_ROTATION);
+          }
+          if (currentY > 0.05)
+          {
+            Serial.println("moving...");
+            analogWrite(MOTOR_POWER_PIN, (int)(((fabs(currentY) - 0.05) / (1.0 - 0.05)) * (MAX_POWER - MIN_POWER) + MIN_POWER));
+            digitalWrite(MOTOR_DIR_PIN, LOW);
+          }
+          else if (currentY < -0.05)
+          {
+
+            analogWrite(MOTOR_POWER_PIN, (int)(((fabs(currentY) - 0.05) / (1.0 - 0.05)) * (MAX_POWER - MIN_POWER) + MIN_POWER));
+            digitalWrite(MOTOR_DIR_PIN, HIGH);
+          }
+          else
+          {
+            analogWrite(MOTOR_POWER_PIN, 0);
+          }
         }
       }
     }
+
     Serial.println("Disconnected.");
   }
+}
+float moveTowardsTarget(float current, float target, float speed, float dt)
+{
+  float maxStep = dt / speed;
+
+  float delta = target - current;
+
+  if (fabs(delta) <= maxStep)
+    return target;
+
+  return current + (delta > 0 ? maxStep : -maxStep);
 }
