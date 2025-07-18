@@ -14,6 +14,10 @@ const Countdown = ({onLap, onFinish}) => {
     const countdownRef = useRef(null);
     const timerIntervalRef = useRef(null);
     const startTimeRef = useRef(null);
+    const lapStartTimeRef = useRef(null);
+
+    const user1FinishRef = useRef(null);
+    const user2FinishRef = userRef(null);
 
     const formatElapsed = (ms) => {
         const minutes = String(Math.floor(ms / 60000) % 60).padStart(2, "0");
@@ -48,7 +52,8 @@ const Countdown = ({onLap, onFinish}) => {
 
      useEffect(() => {
         if(timerRunning) {
-           startTimeRef.current = Date.now();
+            startTimeRef.current = Date.now();
+            lapStartTimeRef.current = Date.now();
             timerIntervalRef.current = setInterval(() => {
                 setElapsedTime(Date.now() - startTimeRef.current);
             }, 10);
@@ -58,42 +63,63 @@ const Countdown = ({onLap, onFinish}) => {
      }, [timerRunning]);
 
     const handleLap = (userIndex) => {
-        const lapTime = formatElapsed(elapsedTime);
+        const now = Date.now();
+        const lapDuration = now - lapStartTimeRef.current;
+        lapStartTimeRef.current = now;
+
+        const formattedLapTime = formatElapsed(lapDuration);
 
         if (userIndex === 0 && user1Laps.length < 3) {
-            const updated = [...user1Laps, lapTime];
+            const updated = [...user1Laps, formattedLapTime];
             setUser1Laps(updated);
-            onLap && onLap(0, lapTime);
-        }
+            onLap && onLap(0, formattedLapTime);
 
-        if (
-            userIndex === 0 &&
-            updated.length === 3 &&
-            user2Laps.length === 3 &&
-            onFinish
-        ) {
-            onFinish({
-                user1: totalTime(updated),
-                user2: totalTime(user2Laps)
-            })
+            if (updated.length === 3) {
+                user1FinishRef.current.now;
+            }
+
+            if (user2Laps === 3 && updated.length === 3 && onFinish) {
+                clearInterval(timerIntervalRef.current);
+
+                const user1Total = formatElapsed(user1FinishRef.current - startTimeRef.current);
+                const user2Total = formatElapsed(user2FinishRef.current - startTimeRef.current);
+
+                onFinish({
+                    user1: user1Total,
+                    user2: user2Total
+                });
+
+            }
+            return;
         }
+        
 
         if (userIndex === 1 && user2Laps.length < 3) {
-            const updated = [...user2Laps, lapTime];
+            const updated = [...user2Laps, formattedLapTime];
             setUser2Laps(updated);
-            onLap && onLap(1, lapTime);
+            onLap && onLap(1, formattedLapTime);
+            
+           if (updated.length === 3) {
+            user2FinishRef.current = now;
+            }
+
+            if (user1Laps.length === 3 && updated.length === 3 && onFinish) {
+                clearInterval(timerIntervalRef.current);
+
+                const user1Total = formatElapsed(user1FinishRef.current - startTimeRef.current);
+                const user2Total = formatElapsed(user2FinishRef.current - startTimeRef.current);
+
+                onFinish({
+                    user1: user1Total,
+                    user2: user2Total
+                })
+            }
+        
         }
 
-        if (
-            updated.length === 3 &&
-            user1Laps.length === 3 &&
-            onFinish
-        ) {
-            onFinish({
-                user1: totalTime(user1Laps),
-                user2: totalTime(updated)
-            })
-        }
+
+
+        return;
     };
         
 

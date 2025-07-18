@@ -322,13 +322,14 @@ function App() {
                             onFinish={handleFinish} onLap={(userIndex, lapTime) => handleLap(userIndex, lapTime)}/>
 
                             <div className="text-sm text-gray-700 text-center mt-2">
+                                <h2>{username1}</h2>
                                 kierrokset: {laps[0].join(", ")} <br/>
-                                Yhteensä: {totalTime.user1}
+                                Yhteensä: {totalTimes.user1}
                             </div>
 
                             <div className="text-sm text-gray-700 text-center mt-2">
                                 kierrokset: {laps[1].join(", ")} <br/>
-                                Yhteensä: {totalTime.user2}
+                                Yhteensä: {totalTimes.user2}
                             </div>
 
                         </div>
