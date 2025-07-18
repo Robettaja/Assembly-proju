@@ -3,8 +3,8 @@
 
 float moveTowardsTarget(float current, float target, float speed, float dt);
 
-BLEService customService("180C");
-BLECharacteristic rxChar("2A56", BLEWriteWithoutResponse | BLERead | BLENotify, 8);
+BLEService customService("12345678-1234-5678-1234-56789abcdef0");
+BLECharacteristic rxChar("abcdefab-cdef-1234-5678-abcdefabcdef", BLEWriteWithoutResponse | BLERead | BLENotify, 8);
 
 Servo servo;
 
@@ -43,7 +43,7 @@ void setup()
   BLE.setAdvertisedService(customService);
   customService.addCharacteristic(rxChar);
   BLE.addService(customService);
-
+  rxChar.setValue(0);
   BLE.advertise();
   Serial.println("BLE peripheral ready");
 }

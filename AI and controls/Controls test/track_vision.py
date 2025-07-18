@@ -421,9 +421,7 @@ def initialize_data():
 
 
 if __name__ == "__main__":
-    track = cv.imread("Track data/track_mask.jpg", cv.IMREAD_GRAYSCALE)
-    track = cv.resize(track, (128, 96))
-    cv.imwrite("Track data/map.jpg", track)
+    pass
     # save_track_data()
     # user1 = User(pygame.joystick.Joystick(0), "Player 1")
     # race_loop(user1, None)
