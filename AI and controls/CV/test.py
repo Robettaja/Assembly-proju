@@ -2,7 +2,6 @@ import cv2 as cv
 import time
 import subprocess
 import cv2.aruco as aruco
-from ultralytics import YOLO
 import numpy as np
 import sys
 
@@ -18,13 +17,15 @@ cmd = [
     "-flags",
     "low_delay",
     "-probesize",
-    "1080",
+    "1296",
     "-analyzeduration",
     "0",
     "-flags",
     "low_delay",
     "-i",
     rtsp,
+    "-b:v",
+    "2M",
     "-f",
     "rawvideo",
     "-pix_fmt",
@@ -32,8 +33,8 @@ cmd = [
     "-",
 ]
 
-width = 640
-height = 480
+width = 2304
+height = 1296
 frame_size = width * height * 3
 
 process = subprocess.Popen(cmd, stdout=subprocess.PIPE, bufsize=frame_size)
@@ -54,9 +55,11 @@ while True:
 
         # Convert to NumPy array and reshape
         frame = np.frombuffer(raw_frame, np.uint8).reshape((height, width, 3))
+        resize = cv.resize(frame, (640, 360))
+        corners, ids, rejected = detector.detectMarkers(frame)
 
         # Display the frame
-        cv.imshow("FFmpeg RTSP Stream", frame)
+        cv.imshow("FFmpeg RTSP Stream", resize)
 
     if cv.waitKey(1) & 0xFF == ord("q"):
         break
