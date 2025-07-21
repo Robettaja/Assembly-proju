@@ -119,29 +119,9 @@ function App() {
     
   };
 
-  const handleLap = (userIndex, lapTime) => {
-    const userId = userIds[userIndex];
-    const currentLaps = laps[userIndex] || [];
-
-    const lapIndex = currentLaps.length;
-    saveLapTime(userId, lapIndex, lapTime);
-
-    const updatedLaps = [...laps];
-    updatedLaps[userIndex] = [...currentLaps, lapTime];
-    setLaps(updatedLaps);
-  };
 
 
-  const handleFinish = (results) => {
-    console.log("Race finished!");
-    console.log("User 1 total time:", results.user1);
-    console.log("User 2 total time:", results.user2);
 
-    saveTotalTime(userIds[0], results.user1);
-    saveTotalTime(userIds[1], results.user2);
-
-    setTotalTimes(results);
-  };
 
   
 
@@ -162,52 +142,6 @@ function App() {
   
       }, [isRunning]);
 
-           const totalTime = (laps) => {
-            const toMs = (str) => {
-                const [m, s, ms] = str.split(":").map(Number);
-                return m * 60000 + s * 1000 + ms * 10;
-            };
-            const sum = laps.reduce((acc, lap) => acc + toMs(lap), 0);
-            const minutes = String(Math.floor(sum / 60000) % 60).padStart(2, "0");
-            const seconds = String(Math.floor(sum / 1000) % 60).padStart(2, "0");
-            const milliseconds = String(Math.floor((sum % 1000) / 10)).padStart(2, "0");
-            return `${minutes}:${seconds}:${milliseconds}`;
-        };
-
-   const saveLapTime = (userId, lapIndex, time) => {
-        const field = `lap${lapIndex + 1}`;
-          return fetch(`http://127.0.0.1:8000/api/usernames/${userId}/`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                [field]: time,
-            }),
-          });
-    };
-
-    const saveTotalTime = (userId, total) => {
-        return fetch(`http://127.0.0.1:8000/api/usernames/${userId}/`, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            total_time: total,
-        }),
-        });
-    };
-
-
-
-        
-    const formatElapsed = (ms) => {
-        const minutes = String(Math.floor(ms / 60000) % 60).padStart(2, "0");
-        const seconds = String(Math.floor(ms / 1000) % 60).padStart(2, "0");
-        const milliseconds = String(Math.floor((ms % 1000) / 10)).padStart(2, "0");
-        return `${minutes}:${seconds}:${milliseconds}`;
-    };
     
 
 
@@ -319,19 +253,10 @@ function App() {
                     <>
                         <div className= "display-container">
                           <Countdown
-                            onFinish={handleFinish} onLap={(userIndex, lapTime) => handleLap(userIndex, lapTime)}/>
-
-                            <div className="text-sm text-gray-700 text-center mt-2">
-                                <h2>{username1}</h2>
-                                kierrokset: {laps[0].join(", ")} <br/>
-                                Yhteensä: {totalTimes.user1}
-                            </div>
-
-                            <div className="text-sm text-gray-700 text-center mt-2">
-                                kierrokset: {laps[1].join(", ")} <br/>
-                                Yhteensä: {totalTimes.user2}
-                            </div>
-
+                            username1={username1}
+                            username2={username2}
+                            userIds={userIds}
+                            />
                         </div>
                         
                         
