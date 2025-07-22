@@ -1,6 +1,6 @@
 import React, {useState, useRef, useEffect} from "react";
 
-const Countdown = ({onLap, onFinish, userIds, username1, username2}) => {
+const Countdown = ({onLap, onFinish, userIds, username1, username2, numLaps}) => {
     const [countdownTime, setCountdownTime] = useState(10);
     const [timerRunning, setTimerRunning] = useState(false);
     const [elapsedTime, setElapsedTime] = useState(0);
@@ -8,6 +8,9 @@ const Countdown = ({onLap, onFinish, userIds, username1, username2}) => {
     const [user1Laps, setUser1Laps] = useState([]);
     const [user2Laps, setUser2Laps] = useState([]);
 
+    const [user1Finished, setUser1Finished] = useState(false);
+    const [user2Finished, setUser2Finished] = useState(false);
+    
     const countdownRef = useRef(null);
     const timerIntervalRef = useRef(null);
     const startTimeRef = useRef(null);
@@ -15,6 +18,8 @@ const Countdown = ({onLap, onFinish, userIds, username1, username2}) => {
        
     const user1FinishRef = useRef(null);
     const user2FinishRef = useRef(null);
+
+    
 
     const formatElapsed = (ms) => {
         const minutes = String(Math.floor(ms / 60000) % 60).padStart(2, "0");
@@ -60,7 +65,8 @@ const Countdown = ({onLap, onFinish, userIds, username1, username2}) => {
     }, [timerRunning]);
 
     useEffect(() => {
-        const bothFinished = user1FinishRef.current !== null && user2FinishRef.current !== null;
+        const bothFinished = user1Finished && user2Finished;
+
         if (bothFinished) {
             clearInterval(timerIntervalRef.current);
 
@@ -75,7 +81,7 @@ const Countdown = ({onLap, onFinish, userIds, username1, username2}) => {
                 user2: user2Total
             });
         }
-    }, [user1Laps, user2Laps]);
+    }, [user1Finished, user2Finished]);
 
     const handleLap = (userIndex) => {
         const now = Date.now();
@@ -90,7 +96,8 @@ const Countdown = ({onLap, onFinish, userIds, username1, username2}) => {
                 onLap && onLap(0, formattedLapTime);
                 saveLapTime(userIds[0], updated.length - 1, formattedLapTime);
 
-                if (updated.length === 3) {
+                if (updated.length === numLaps) {
+                    setUser1Finished(true);
                     user1FinishRef.current = now;
                 }
 
@@ -104,7 +111,8 @@ const Countdown = ({onLap, onFinish, userIds, username1, username2}) => {
                 onLap && onLap(1, formattedLapTime);
                 saveLapTime(userIds[1], updated.length - 1, formattedLapTime);
 
-                if (updated.length === 3) {
+                if (updated.length === numLaps) {
+                    setUser2Finished(true);
                     user2FinishRef.current = now;
                 }
 
@@ -151,7 +159,7 @@ const Countdown = ({onLap, onFinish, userIds, username1, username2}) => {
                         <h3>{username1}</h3>
                         <button 
                             onClick={() => handleLap(0)}
-                            disabled={user1Laps.length >= 3}
+                            disabled={user1Laps.length >= numLaps}
                             className="bg-blue-500 text-white px-4 py-2 rounded mb-2">
                             Lap
                         </button>
@@ -162,7 +170,7 @@ const Countdown = ({onLap, onFinish, userIds, username1, username2}) => {
                                 <li key = {i}>{lap}</li>
                             ))}
                         </ul>
-                        {user1Laps.length === 3 && (
+                        {user1Laps.length === numLaps && (
                             <div> Total time: {formatElapsed(user1FinishRef.current - startTimeRef.current)}</div>
                         )}
                     </div>
@@ -171,7 +179,7 @@ const Countdown = ({onLap, onFinish, userIds, username1, username2}) => {
                         <h3 className="text-x1 mb-2">{username2}</h3>
                         <button
                             onClick={() => handleLap(1)}
-                            disabled={user2Laps.length >= 3}
+                            disabled={user2Laps.length >= numLaps}
                             className="bg-green-500 text-white px-4 py-2 rounded mb-2">
                             Lap
                         </button>
@@ -183,7 +191,7 @@ const Countdown = ({onLap, onFinish, userIds, username1, username2}) => {
                             ))}
                         </ul>
 
-                        {user2Laps.length === 3 && (
+                        {user2Laps.length === numLaps && (
                             <div>Total time: {formatElapsed(user2FinishRef.current - startTimeRef.current)}</div>
                         )}
                     </div>

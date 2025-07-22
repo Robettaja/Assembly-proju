@@ -28,6 +28,8 @@ function App() {
   const intervalIdRef = useRef(null);
   const startTimeRef = useRef(0);
 
+  const [numLaps, setNumLaps] = useState(3);
+
   const [activeMenu, setActiveMenu] = useState(false);
 
 
@@ -119,7 +121,17 @@ function App() {
     
   };
 
-
+  const reset = () => {
+    setSubmitted(false);
+    setUsername1("");
+    setUsername2("");
+    setUserIds([]);
+    setLaps([[], []]);
+    setTotalTimes({user1: "", user2: ""});
+    setElapsedTime(0);
+    setTime("");
+    setNumLaps(3);
+  };
 
 
 
@@ -176,6 +188,7 @@ function App() {
                           <li><Link to="/">Home</Link></li>
                           <li><Link to ="/users">Users</Link></li>
                           <li><Link to="/leaderboard">Leaderboard</Link></li>
+                          <li><a href="http://raspberrypi:8889/cam1/" target="_blank">Video</a></li>
                   </ul>
                 
                 
@@ -231,6 +244,22 @@ function App() {
                           </div>
                         </div>
 
+                        <div className='lap-numbers'>
+                          <label>
+                            <p className='font-bold uppercase'>Laps:</p>
+                            <input 
+                              type="number"
+                              min="1"
+                              max="10"
+                              value={numLaps}
+                              onChange={(e) => setNumLaps(parseInt(e.target.value))}
+                              required
+                              />
+                          </label>
+
+                        </div>
+                        
+
                         <div className="button-row">
                           <button type="submit">
                             <span></span>
@@ -256,17 +285,14 @@ function App() {
                             username1={username1}
                             username2={username2}
                             userIds={userIds}
+                            numLaps={numLaps}
                             />
                         </div>
                         
                         
 
-                        <button onClick={() => {
-                          setSubmitted(false)
-                          setUser("");
-                          reset();
-                        
-                        }} id="back-arrow">
+                        <button onClick = {reset}                         
+                        id="back-arrow">
                           <VscArrowLeft />
                         </button>
                     </>
