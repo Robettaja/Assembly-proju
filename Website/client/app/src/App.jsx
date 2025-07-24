@@ -105,9 +105,17 @@ function App() {
     if (username1.trim() !== "") usersToAdd.push({ user: username1 }); 
     if (username2.trim() !== "") usersToAdd.push({ user: username2 }); 
 
-    const addedUsers = await addUser(usersToAdd);
+
+    try {
+      const addedUsers = await addUser(usersToAdd);
+      
+      if (addedUsers && addedUsers.length > 0) {
+        setUserIds(addedUsers.map(u => u.id));
+      }
+    }
+    
     if (addedUsers && addedUsers.length > 0) {
-      setUserIds(addedUsers.map(u => u.id))
+      setUserIds(addedUsers.map(u => u.id));
       setSubmitted(true);
       setUsername1(""); 
       setUsername2("");
@@ -135,37 +143,26 @@ function App() {
 
 
 
-  
-
-      useEffect(() => {
 
 
-        if(isRunning){
-            intervalIdRef.current = setInterval(() => {
-              setElapsedTime(Date.now() - startTimeRef.current);
-            }, 10);
+  useEffect(() => {
 
-        }
 
-        return () => {
-          clearInterval(intervalIdRef.current);
-        }
-  
-  
-      }, [isRunning]);
+    if(isRunning){
+        intervalIdRef.current = setInterval(() => {
+          setElapsedTime(Date.now() - startTimeRef.current);
+        }, 10);
 
-    try {
-      const response = await fetch('http://localhost:8000/api/start/', {
-        method: 'POsT',
-      });
-
-      const data = await response.json();
-      console.log(data.message);
-    } catch (error) {
-      console.error('Error to start the race', error);
     }
 
-    setSubmitted(true);
+    return () => {
+      clearInterval(intervalIdRef.current);
+    }
+
+
+  }, [isRunning]);
+
+
 
 
       
