@@ -8,7 +8,7 @@ BLECharacteristic rxChar("abcdefab-cdef-1234-5678-abcdefabcdef", BLEWriteWithout
 
 Servo servo;
 
-const char *carName = "CAR2";
+const char *carName = "CAR1";
 
 const int ROTATION_AMOUNT = 30;
 const int DEFAULT_ROTATION = 93;

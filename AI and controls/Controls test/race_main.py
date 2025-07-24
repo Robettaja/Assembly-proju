@@ -42,6 +42,7 @@ class User:
         self.raceTime = 0
         self.is_player = is_player
         self.completedRace = False
+        self.lapTimes = []
         self.nextCheckpointIndex = 0
         self.lapsCompleted = 0
         self.name = name
