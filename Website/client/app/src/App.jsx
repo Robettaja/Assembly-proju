@@ -154,7 +154,18 @@ function App() {
   
       }, [isRunning]);
 
-    
+    try {
+      const response = await fetch('http://localhost:8000/api/start/', {
+        method: 'POsT',
+      });
+
+      const data = await response.json();
+      console.log(data.message);
+    } catch (error) {
+      console.error('Error to start the race', error);
+    }
+
+    setSubmitted(true);
 
 
       

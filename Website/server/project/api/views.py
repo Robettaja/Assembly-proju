@@ -4,6 +4,8 @@ from rest_framework import status
 from .models import Username
 from .serializer import UsernameSerializer
 from django.shortcuts import render
+from django.http import JsonResponse
+from .race_main import start_race
 
 @api_view(['GET'])
 def get_usernames(request):
@@ -64,3 +66,7 @@ def update_user(request, pk):
         serializer.save()
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+def start_race_views(request):
+    start_race()
+    return JsonResponse({"message": "Race Started"})
