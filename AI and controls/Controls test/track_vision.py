@@ -372,6 +372,7 @@ def initialize_data():
             break
     else:
         print("[FAIL] Could not reach the Raspberry Pi on any IP.")
+        return
 
     frame = cv.imread("Track data/track.jpg")
     frame = cv.resize(frame, (640, 480))
