@@ -17,7 +17,7 @@ const Pagination = ({namesPerPage, totalNames, setCurrentPage, currentPage }) =>
 
     return (
         <nav>
-            <ul className="pagination">
+            <ul className="flex flex-row gap-4">
                 {pageNumbers.map((number) => (
                     <li 
                         key={number}

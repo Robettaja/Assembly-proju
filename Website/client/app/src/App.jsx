@@ -181,9 +181,7 @@ function App() {
 
 <div className = "App">
   <div className="video-background-container1">
-        <video autoPlay muted loop playsInline className= "background-video-blur blur-sm w-100">
-          <source src="/videos/driftingcar.mp4" type= "video/mp4"/>
-        </video>
+       
     <Router>
         <div>
             <div className="nav-bar">
@@ -224,6 +222,10 @@ function App() {
           <Route path="/" element={
 
         <div>
+          <video autoPlay muted loop playsInline className= "background-video-blur blur-sm w-100">
+            <source src="/videos/driftingcar.mp4" type= "video/mp4"/>
+          </video>
+          
           <div className="video-background-container">
             <video autoPlay muted loop playsInline className="background-video">
               <source src="/videos/driftingcar.mp4" type= "video/mp4"/>

@@ -37,21 +37,26 @@ const Users = ({usernames, deleteUser}) => {
         fetchNames();
     }, []);
 
+  
+
     return (
         <>
-            <div className='heading'>
-                <h1>Users</h1>
-                
-                <Pagination
-                    namesPerPage={namesPerPage}
-                    totalNames={filteredUsers.length}
-                    setCurrentPage={setCurrentPage}
-                    currentPage={currentPage}
-                    />
+          <div className='flex flex-col pt-2 px-6 h-full'>
+             
+            <div className='flex flex-col gap-6 p-6 max-w-4xl mx-auto my-8'>
+                <h1 className='text-3x1 font-bold text-center text-gray-800'>Users</h1>
+                    <div className='mt-4 flex justify-center'>
+                        <Pagination
+                            namesPerPage={namesPerPage}
+                            totalNames={filteredUsers.length}
+                            setCurrentPage={setCurrentPage}
+                            currentPage={currentPage}
+                            />  
+                    </div>
             </div>
 
-            <div className = "searchbar">
-                <h1>Search</h1>
+            <div className = "flex flex-col gap-2">
+                <h1 className='text-x1 font-semibold text-gray-700'>Search</h1>
                 <div className="search-container">
                     <TextField
                         id="outlined-basic"
@@ -68,22 +73,28 @@ const Users = ({usernames, deleteUser}) => {
                 </div> 
             </div>
 
-            <div className='max-h-[700vh]'>
-                <h2>Users</h2>
+            <div className='flex flex-col gap-4'>
+                
                 {currentUsers.map((username) => (
-                    <div className="saved-data" key={username.id}>
-                        <button onClick={() => deleteUser(username.id)} id="x-button">
-                            <VscChromeClose />
+                    <div className="flex justify-between items-center border border-gray-300 rounded-lg p-4 shadow-ms hover:shadow-md transition"
+                     key={username.id}>
+
+                        <button onClick={() => deleteUser(username.id)} 
+                            className="text-red-500 hover:text-red-700"
+                            aria-label="Delete">
+                            <VscChromeClose size={20} />
                         </button>
 
                         <div className="username-email">
-                            Username: {username.user} <br />
+                            <p className='text-lg font-medium'>Username: {username.user}</p> <br />
                             
-                            Laptime: {username.total_time}
+                            <p className='text-sm text-gray-600'>Laptime: {username.total_time}</p>
                         </div>
                     </div>
                 ))}
            </div>  
+        
+          </div>
         </>
     );
 
