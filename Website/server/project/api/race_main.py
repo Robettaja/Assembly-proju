@@ -142,7 +142,7 @@ async def run():
 
 
 def start_race():
-    from track_vision import race_loop, initialize_data
+    from .track_vision import race_loop, initialize_data
 
     users.append(User(1, "Player1", 1))
     users.append(User(2, "Player2", 2))

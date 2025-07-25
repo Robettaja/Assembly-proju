@@ -6,6 +6,7 @@ from .serializer import UsernameSerializer
 from django.shortcuts import render
 from django.http import JsonResponse
 from .race_main import start_race
+from django.views.decorators.csrf import csrf_exempt
 
 @api_view(['GET'])
 def get_usernames(request):
@@ -67,6 +68,13 @@ def update_user(request, pk):
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+#def start_race_views(request):
+ #   start_race()
+ #   return JsonResponse({"message": "Race Started"})
+
+@csrf_exempt
 def start_race_views(request):
-    start_race()
-    return JsonResponse({"message": "Race Started"})
+    if request.method == 'POST':
+        start_race()
+        return JsonResponse({'message': 'Race started!'})
+    return JsonResponse({'error':'Invalid request'}, status=400) 

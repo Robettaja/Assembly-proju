@@ -111,22 +111,33 @@ function App() {
       
       if (addedUsers && addedUsers.length > 0) {
         setUserIds(addedUsers.map(u => u.id));
+
+        const response = await fetch('http://127.0.0.1:8000/api/start/', {
+          method: 'POST',
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to start race');
+        }
+
+        const data = await response.json();
+        console.log(data.message);
+
+        setSubmitted(true);
+        setUsername1(""); 
+        setUsername2("");
+            
+        const now = new Date();
+        const formattedTime = now.toLocaleDateString();
+        setTime(formattedTime);
+
+      } else {
+        alert("Failed to add users. Please try again.");
       }
-    }
-    
-    if (addedUsers && addedUsers.length > 0) {
-      setUserIds(addedUsers.map(u => u.id));
-      setSubmitted(true);
-      setUsername1(""); 
-      setUsername2("");
-      const now = new Date();
-      const formattedTime = now.toLocaleDateString();
-      setTime(formattedTime);
-    } else
-    {
-      alert("Failed to add users. Please try again.");
-    }
-    
+    } catch (error) {
+      console.error("Error on handleSebmit", error);
+      alert("Something went wrong. Check console.")
+    }    
   };
 
   const reset = () => {
