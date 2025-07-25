@@ -124,8 +124,6 @@ function App() {
         console.log(data.message);
 
         setSubmitted(true);
-        setUsername1(""); 
-        setUsername2("");
             
         const now = new Date();
         const formattedTime = now.toLocaleDateString();
@@ -180,7 +178,7 @@ function App() {
   return (
 
 <div className = "App">
-  <div className="video-background-container1">
+  <div className="">
        
     <Router>
         <div>
@@ -221,8 +219,8 @@ function App() {
       <Routes>
           <Route path="/" element={
 
-        <div>
-          <video autoPlay muted loop playsInline className= "background-video-blur blur-sm w-100">
+        <div className='video-background-wrapper'>
+          <video autoPlay muted loop playsInline className= "background-video-blur">
             <source src="/videos/driftingcar.mp4" type= "video/mp4"/>
           </video>
           
@@ -252,6 +250,8 @@ function App() {
                             </label>
                           </div>
                           
+                          
+
                           <div className="input-container">
                             <label>
                               <p className="font-bold uppercase ">Player 2:</p>

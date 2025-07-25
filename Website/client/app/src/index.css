@@ -44,7 +44,6 @@ html, body, #root {
   justify-content: center;
   align-items: center;
   text-align: center;
-  width: 100vw;
   margin: 0;
 }
 
@@ -113,6 +112,9 @@ body {
   background-color: transparent;
   border:none;
   z-index: 10;
+  position: absolute;
+  top: 20px;
+  right: 20px;
 
 }
 
@@ -177,49 +179,55 @@ body {
   width: 50%;
 }
 
-.video-background-container1 {
-  position: absolute;
-  display: flex;
+.video-background-wrapper {
+  position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
+  overflow: hidden;
+
+
+}
+
+
+.background-video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 1300px;
+  height: 500px;
+  object-fit: cover;
   z-index: -1;
-  justify-content: center;
-  align-items: center;
-
+ 
 }
 
 
-
-.video-background-container {
-  position: relative;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  
-}
-
-.background-video, 
 .background-video-blur {
   position: absolute;
-  display: flex;
-  justify-content: center;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
   object-fit: cover;
-  z-index: -2;
-  pointer-events: none;
+  filter: blur(10px);
+  z-index: -1;
 }
 
-
+.race {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
 
 h1 {
   font-size: 4em;
   line-height: 1.1;
 }
+
+
 
 .input-form {
   position: relative;
@@ -436,6 +444,7 @@ input {
   border-radius: 15px;
   margin: 0 auto;
   padding: 1em; 
+  z-index: 10;
 }
 
 .display-container h2 {
