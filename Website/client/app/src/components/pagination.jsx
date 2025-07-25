@@ -2,25 +2,16 @@ import React, { useState } from 'react';
 
 
 
-const Pagination = ({
-
-   
-    
-    namesPerPage,
-    totalNames,
-    setCurrentPage,
-    currentPage,
-}) => {
-   
+const Pagination = ({namesPerPage, totalNames, setCurrentPage, currentPage }) => {
    
     const pageNumbers = [];
 
-    for (let i = 1; i = Math.ceil(totalNames / namesPerPage); i++) {
+    for (let i = 1; i <= Math.ceil(totalNames / namesPerPage); i++) {
         pageNumbers.push(i);
     }
 
     const paginate = (pageNumber, e) => {
-        e.PreventDefault();
+        e.preventDefault();
         setCurrentPage(pageNumber);
     };
 
@@ -33,8 +24,8 @@ const Pagination = ({
                         className={`page-item ${currentPage === number ? "active" : ""}`}
                     >
                         <a
-                            onClick={(e) => paginate(number, e)}
                             href="!#"
+                            onClick={(e) => paginate(number, e)}
                             className="page-link"
                         >
                             {number}

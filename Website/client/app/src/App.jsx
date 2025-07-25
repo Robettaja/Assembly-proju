@@ -112,7 +112,7 @@ function App() {
       if (addedUsers && addedUsers.length > 0) {
         setUserIds(addedUsers.map(u => u.id));
 
-        const response = await fetch('http://127.0.0.1:8000/api/start/', {
+        const response = await fetch('http://localhost:8000/api/start/', {
           method: 'POST',
         });
 
