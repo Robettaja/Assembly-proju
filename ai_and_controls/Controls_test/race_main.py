@@ -6,6 +6,10 @@ from bleak.backends.winrt.client import BleakClientWinRT
 
 import pygame
 
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 intersections = [True, True]
 frame_lock = threading.Lock()
 
@@ -41,6 +45,7 @@ class User:
         self.raceTime = 0
         self.is_player = is_player
         self.completedRace = False
+        self.lapTimes = []
         self.nextCheckpointIndex = 0
         self.lapsCompleted = 0
         self.name = name
@@ -140,9 +145,9 @@ async def run():
 
     await asyncio.gather(*tasks)
 
+from track_vision import race_loop, initialize_data
 
 def start_race():
-    from .track_vision import race_loop, initialize_data
 
     users.append(User(1, "Player1", 1))
     users.append(User(2, "Player2", 2))

@@ -7,5 +7,5 @@ urlpatterns = [
     path('usernames/create/', create_usernames, name='create_usernames'),
     path('usernames/create-multiple/', create_multiple_usernames, name='create_multiple_usernames'),
     path('usernames/<int:pk>/', usernames_detail, name='usernames_detail'),
-    path('start/', views.start_race),
+    path('start/', views.start_race_views),
 ]
