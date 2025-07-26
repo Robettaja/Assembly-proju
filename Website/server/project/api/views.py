@@ -7,6 +7,8 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from .race_main import start_race
 from django.views.decorators.csrf import csrf_exempt
+import requests
+
 
 @api_view(['GET'])
 def get_usernames(request):
@@ -73,8 +75,14 @@ def update_user(request, pk):
  #   return JsonResponse({"message": "Race Started"})
 
 @csrf_exempt
-def start_race_views(request):
+def start_race(request):
     if request.method == 'POST':
-        start_race()
-        return JsonResponse({'message': 'Race started!'})
-    return JsonResponse({'error':'Invalid request'}, status=400) 
+        try:
+            response = requests.post('http://localhost:5001/start-race')
+            return JsonResponse(response.json())
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+        
+    
+

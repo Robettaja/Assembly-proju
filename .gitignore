@@ -1,0 +1,34 @@
+# Virtuaaliympäristöt
+venv/
+ENV/
+env/
+.venv/
+
+# Python-välimuistit
+__pycache__/
+*.py[cod]
+*$py.class
+
+# React / Node
+node_modules/
+build/
+dist/
+.cache/
+
+# Editorit
+.vscode/
+.idea/
+
+# Tietokannat ja migraatiot
+*.sqlite3
+*.db
+**/migrations/*.py
+**/migrations/__pycache__/
+
+# Ympäristömuuttujat
+.env
+.env.*
+
+# Muut roskatiedostot
+.DS_Store
+Thumbs.db
