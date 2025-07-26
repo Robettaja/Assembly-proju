@@ -131,19 +131,23 @@ def white_pixels_side(mask, axis="y"):
 
 def get_track_mask(image):
     gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-    blur = cv.GaussianBlur(gray, (21, 21), 0)
-    ret, thresh = cv.threshold(blur, 200, 255, cv.THRESH_BINARY_INV)
-    contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
-    return thresh
 
+    kernel_size = 5
+    blur_gray = cv.GaussianBlur(gray, (kernel_size, kernel_size), 0)
+    low_threshold = 50
+    high_threshold = 150
+    edges = cv.Canny(blur_gray, low_threshold, high_threshold)
+
+    # Apply dilation to expand white areas
+
+    contours, _ = cv.findContours(edges, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
     sorted_contours = sorted(contours, key=cv.contourArea, reverse=True)
-    parent_contour = sorted_contours[0]
     mask = np.zeros(image.shape, dtype=np.uint8)
 
     cv.drawContours(
-        mask, [sorted_contours[0]], -1, (255, 255, 255), thickness=cv.FILLED
+        mask, [sorted_contours[1]], -1, (255, 255, 255), thickness=cv.FILLED
     )
-    cv.drawContours(mask, [sorted_contours[2]], -1, (0, 0, 0), thickness=cv.FILLED)
+    # cv.drawContours(mask, [sorted_contours[2]], -1, (0, 0, 0), thickness=cv.FILLED)
     # cv.imshow("Track Mask", mask)
     return mask
 
@@ -458,7 +462,7 @@ def initialize_data():
         return
 
     frame = cv.imread("Track data/track.jpg")
-    frame = cv.resize(frame, (640, 480))
+    frame = cv.resize(frame, (1280, 640))
     if not Path(TRACK_PATH).exists():
         track_mask = get_track_mask(frame)
         cv.imwrite(TRACK_PATH, track_mask)
