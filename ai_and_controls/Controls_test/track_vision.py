@@ -131,24 +131,38 @@ def white_pixels_side(mask, axis="y"):
 
 
 def get_track_mask(image):
-    gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    hsv = cv.cvtColor(image, cv.COLOR_BGR2HSV)
 
-    kernel_size = 5
-    blur_gray = cv.GaussianBlur(gray, (kernel_size, kernel_size), 0)
-    low_threshold = 50
-    high_threshold = 150
-    edges = cv.Canny(blur_gray, low_threshold, high_threshold)
+    lower_red1 = np.array([0, 70, 50])
+    upper_red1 = np.array([10, 255, 255])
 
-    # Apply dilation to expand white areas
- 
-    contours, _ = cv.findContours(edges, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
+    lower_red2 = np.array([170, 70, 50])
+    upper_red2 = np.array([180, 255, 255])
+
+    mask1 = cv.inRange(hsv, lower_red1, upper_red1)
+    mask2 = cv.inRange(hsv, lower_red2, upper_red2)
+
+    red_mask = cv.bitwise_or(mask1, mask2)
+
+    result = image.copy()
+
+    result[red_mask > 0] = [255, 255, 255]
+
+    gray = cv.cvtColor(result, cv.COLOR_BGR2GRAY)
+    blur = cv.GaussianBlur(gray, (21, 21), 0)
+
+    inv = cv.bitwise_not(blur)
+    ret, thresh = cv.threshold(inv, 90, 255, cv.THRESH_BINARY)
+    kernel = np.ones((1, 1), np.uint8)
+    dilated = cv.dilate(thresh, kernel, iterations=2)
+    contours, _ = cv.findContours(dilated, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
     sorted_contours = sorted(contours, key=cv.contourArea, reverse=True)
     mask = np.zeros(image.shape, dtype=np.uint8)
 
     cv.drawContours(
         mask, [sorted_contours[1]], -1, (255, 255, 255), thickness=cv.FILLED
     )
-    # cv.drawContours(mask, [sorted_contours[2]], -1, (0, 0, 0), thickness=cv.FILLED)
+    cv.drawContours(mask, [sorted_contours[2]], -1, (0, 0, 0), thickness=cv.FILLED)
     # cv.imshow("Track Mask", mask)
     return mask
 
