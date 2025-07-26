@@ -1,12 +1,15 @@
 import cv2 as cv
-import requests
 import threading
+import subprocess
+import requests
 import cv2.aruco as aruco
 import numpy as np
+import queue
 from pathlib import Path
 
 line_pos_x = ""
 line_pos_y = ""
+frame_queue = queue.Queue(maxsize=5)
 
 
 class RaceData:
@@ -37,6 +40,58 @@ def try_request(ip):
     except requests.RequestException as e:
         print(f"[WARN] Failed to reach {ip}: {e}")
     return False
+
+
+def read_frames():
+    rtsp = "rtsp://raspberrypi:8554/cam1"
+
+    cmd = [
+        "ffmpeg",
+        "-fflags",
+        "nobuffer",
+        "-flags",
+        "low_delay",
+        "-strict",
+        "experimental",
+        "-analyzeduration",
+        "0",
+        "-probesize",
+        "32",
+        "-rtsp_transport",
+        "tcp",
+        "-i",
+        rtsp,
+        "-vsync",
+        "passthrough",
+        "-f",
+        "rawvideo",
+        "-pix_fmt",
+        "bgr24",
+        "-",
+    ]
+    width = 1280
+    height = 640
+    frame_size = width * height * 3
+
+    global process
+
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, bufsize=10**8)
+    while True:
+        if process.stdout:
+            raw_frame = process.stdout.read(frame_size)
+            if len(raw_frame) != frame_size:
+                print("Frame incomplete or stream ended")
+                break
+
+            frame = np.frombuffer(raw_frame, dtype=np.uint8).reshape((height, width, 3))
+            try:
+                frame_queue.put_nowait(frame)
+            except queue.Full:
+                try:
+                    frame_queue.get_nowait()
+                    frame_queue.put_nowait(frame)
+                except queue.Full:
+                    pass
 
 
 def get_line_orientation(line):
@@ -75,15 +130,11 @@ def white_pixels_side(mask, axis="y"):
 
 
 def get_track_mask(image):
-    lower_blue = np.array([90, 45, 30])  # Lower hue, lower saturation and brightness
-    upper_blue = np.array([140, 255, 255])  # Keep upper bound wide
-    image = cv.cvtColor(image, cv.COLOR_BGR2HSV)
-    mask = cv.inRange(image, lower_blue, upper_blue)
-    dialite_kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5, 5))
-    dialated_mask = cv.dilate(mask, dialite_kernel, iterations=2)
-    contours, hierarchy = cv.findContours(
-        dialated_mask, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE
-    )
+    gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    blur = cv.GaussianBlur(gray, (21, 21), 0)
+    ret, thresh = cv.threshold(blur, 200, 255, cv.THRESH_BINARY_INV)
+    contours, hierarchy = cv.findContours(thresh, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
+    return thresh
 
     sorted_contours = sorted(contours, key=cv.contourArea, reverse=True)
     parent_contour = sorted_contours[0]
@@ -277,14 +328,14 @@ def save_checkpoints():
     cv.imwrite("Track data/checkpoint2.jpg", checkpoint2)
 
 
-def race_loop(player1, player2=None, race_data=RaceData(1, False)):
+def race_analyze(player1, player2=None, race_data=RaceData(1, False)):
     from race_main import set_user_intersection
 
     users = [player1]
     if player2:
         users.append(player2)
-    RESIZE_WIDTH = 1920
-    RESIZE_HEIGHT = 1080
+    RESIZE_WIDTH = 1280
+    RESIZE_HEIGHT = 640
 
     lock = threading.Lock()
     track = cv.imread("Track data/track_mask.jpg", cv.IMREAD_GRAYSCALE)
@@ -310,20 +361,46 @@ def race_loop(player1, player2=None, race_data=RaceData(1, False)):
         checkpoints.reverse()
 
     aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_APRILTAG_25H9)
-    parameters = cv.aruco.DetectorParameters()
+    params = cv.aruco.DetectorParameters()
 
-    detector = cv.aruco.ArucoDetector(aruco_dict, parameters)
-    video = cv.VideoCapture(1)
-    video.set(cv.CAP_PROP_FRAME_WIDTH, RESIZE_WIDTH)
-    video.set(cv.CAP_PROP_FRAME_HEIGHT, RESIZE_HEIGHT)
-    ret, frame = video.read()
-    last_car = np.zeros(frame.shape, dtype=np.uint8)
-    last_car = cv.cvtColor(last_car, cv.COLOR_BGR2GRAY)
+    params.cornerRefinementMethod = cv.aruco.CORNER_REFINE_SUBPIX
+    params.cornerRefinementWinSize = 5  # Try 3-7
+    params.cornerRefinementMaxIterations = 30
+    params.cornerRefinementMinAccuracy = 0.1
+
+    # Reduce minimum distance between markers to allow closer detection
+    params.minMarkerDistanceRate = 0.05
+    params.minMarkerPerimeterRate = 0.01
+
+    # Loosen adaptive thresholding to cope with motion blur
+    params.adaptiveThreshWinSizeMin = 3
+    params.adaptiveThreshWinSizeMax = 23
+    params.adaptiveThreshWinSizeStep = 10
+    params.adaptiveThreshConstant = 7  # Slightly lower may help in low contrast
+
+    # Enable perspective removal with relaxed parameters
+    params.perspectiveRemoveIgnoredMarginPerCell = 0.13
+    params.perspectiveRemovePixelPerCell = 8  # smaller = faster
+
+    # Speed-vs-accuracy balance
+    params.errorCorrectionRate = 0.6  # higher tolerates partial occlusion
+
+    # Accept more candidates (may reduce false negatives)
+    params.maxErroneousBitsInBorderRate = 0.45
+    params.minOtsuStdDev = 5.0
+    params.minCornerDistanceRate = 0.05
+
+    detector = cv.aruco.ArucoDetector(aruco_dict, params)
+
+    last_car = np.zeros((RESIZE_HEIGHT, RESIZE_WIDTH, 1), dtype=np.uint8)
+    # last_car = cv.cvtColor(last_car, cv.COLOR_BGR2GRAY)
 
     while True:
-        ret, frame = video.read()
-        if not ret:
-            break
+        try:
+            frame = frame_queue.get(timeout=1)
+        except queue.Empty:
+            continue
+        frame = frame.copy()
         gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
 
         corners, ids, rejected = detector.detectMarkers(gray)
@@ -335,10 +412,6 @@ def race_loop(player1, player2=None, race_data=RaceData(1, False)):
                     if marker_id == user.arucoID:
                         pts = corners[i][0].astype(np.int32)
                         cv.fillConvexPoly(mask, pts, (255, 255, 255))
-
-                kernel = np.ones((9, 9), np.uint8)
-                mask = cv.dilate(mask, kernel, iterations=2)
-
             if cv.countNonZero(mask) > 0:
                 last_car = mask
                 if is_intersecting(mask, track):
@@ -348,8 +421,13 @@ def race_loop(player1, player2=None, race_data=RaceData(1, False)):
             if user.nextCheckpointIndex < len(checkpoints) and is_intersecting(
                 last_car, checkpoints[user.nextCheckpointIndex]
             ):
+                print("Crossed checkpoint ", user.nextCheckpointIndex)
                 user.nextCheckpointIndex += 1
             if user.nextCheckpointIndex >= len(checkpoints):
+                lapTimes = 0
+                for time in user.lapTimes:
+                    lapTimes += time
+                user.lapTimes.append(user.raceTime - lapTimes)
                 user.lapsCompleted += 1
                 user.nextCheckpointIndex = 1
                 if user.lapsCompleted == race_data.laps:
@@ -359,6 +437,11 @@ def race_loop(player1, player2=None, race_data=RaceData(1, False)):
         # Exit on 'q' key press
         if cv.waitKey(1) & 0xFF == ord("q"):
             break
+
+
+def race_loop(player1, player2=None, race_data=RaceData(1, False)):
+    threading.Thread(target=read_frames, daemon=True).start()
+    threading.Thread(target=race_analyze, args=(player1,), daemon=True).start()
 
 
 def initialize_data():

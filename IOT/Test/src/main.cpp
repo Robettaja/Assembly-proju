@@ -11,10 +11,10 @@ Servo servo;
 const char *carName = "CAR1";
 
 const int ROTATION_AMOUNT = 30;
-const int DEFAULT_ROTATION = 93;
+const int DEFAULT_ROTATION = 90;
 
 const int MIN_POWER = 20;
-const int MAX_POWER = 32;
+int MAX_POWER = 24;
 
 const int SERVO_PIN = 10;
 const int MOTOR_DIR_PIN = 11;
@@ -61,6 +61,8 @@ void loop()
   {
     Serial.print("Connected to: ");
     Serial.println(central.address());
+    unsigned long lastReceiveTime = 0;     // Time of last valid data received
+    const unsigned long timeout = 300; 
 
     while (central.connected())
     {
@@ -79,9 +81,23 @@ void loop()
           float x, y;
           memcpy(&x, &payload[0], 4);
           memcpy(&y, &payload[4], 4);
+          lastReceiveTime = currentTime;
 
-          currentX = x;
+          if (currentTime - lastReceiveTime > timeout)
+          {
+            x = 0.0;
+            y = 0.0;
+          }
+
+          currentX = moveTowardsTarget(currentX, x, 0.08, deltaTime);;
           currentY = moveTowardsTarget(currentY, y, 0.01, deltaTime);
+
+          if(currentX > 0.5 || currentX < -0.5) {
+              MAX_POWER = 30 ;
+          } 
+          else {
+              MAX_POWER = 24;
+          }
 
           if (currentX > 0.05)
           {
@@ -119,6 +135,7 @@ void loop()
     }
 
     Serial.println("Disconnected.");
+    analogWrite(MOTOR_POWER_PIN,0);
   }
 }
 float moveTowardsTarget(float current, float target, float speed, float dt)

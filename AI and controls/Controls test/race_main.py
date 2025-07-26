@@ -1,11 +1,11 @@
 import asyncio
 import threading
-import keyboard
 import struct
 from bleak import BleakClient, BleakScanner
 from bleak.backends.winrt.client import BleakClientWinRT
 
 import pygame
+
 
 intersections = [True, True]
 frame_lock = threading.Lock()
@@ -16,6 +16,13 @@ controller_locks = {}
 users = []
 
 PLAYER_DEVICE_MAP = {}
+
+
+def race_over():
+    for user in users:
+        if not user.completedRace:
+            return False
+    return True
 
 
 def set_user_intersection(index, value):
@@ -72,6 +79,7 @@ def check_controllers():
 def py_thread():
     pygame.init()
     pygame.joystick.init()
+    clock = pygame.time.Clock()
     joystics = []
     for player in users:
         if pygame.joystick.get_count() <= player.controller_id:
@@ -81,13 +89,20 @@ def py_thread():
         joystics.append(joystick)
     try:
         while True:
+            pygame.event.pump()
+            dt = clock.tick(60) / 1000
             for player in users:
-                pygame.event.pump()
+                if player.completedRace:
+                    continue
+                player.raceTime += dt
                 joystick = joystics[player.controller_id]
+                joystick.rumble(1, 1, 16)  # Reset rumble
                 x = joystick.get_axis(0) * player.speed
                 y = -joystick.get_axis(3) * player.speed
                 with controller_locks[player.player_number]:
                     controller_inputs[player.player_number] = (x, y)
+            if race_over():
+                break
 
     except KeyboardInterrupt:
         print("\nExiting...")
@@ -115,8 +130,11 @@ async def handle_device(device, player_number):
                 await asyncio.sleep(1 / 100)
 
             except Exception as e:
-                print(f"[{device.name}] Error: {e}")
                 await asyncio.sleep(0.05)
+            if race_over():
+                payload = struct.pack("ff", 0, 0)
+                await client.write_gatt_char(CHAR_UUID, payload, response=False)
+                return
 
 
 async def run():
@@ -146,8 +164,8 @@ async def run():
 def start_race():
     from track_vision import race_loop, initialize_data
 
-    users.append(User(1, "Player1", 1))
-    users.append(User(2, "Player2", 2))
+    users.append(User(1, "Player1", 0))
+    # users.append(User(2, "Player2", 2))
     race_data = RaceData(laps=1, clockwise=False)
 
     if not check_controllers():
@@ -157,13 +175,13 @@ def start_race():
         return
     for i in range(len(users)):
         controller_locks[i + 1] = threading.Lock()
-        DEVICES.append("CAR" + str(users[i].arucoID))
-        PLAYER_DEVICE_MAP[i + 1] = "CAR" + str(users[i].arucoID)
+        DEVICES.append("CAR" + str(users[i].player_number))
+        PLAYER_DEVICE_MAP[i + 1] = "CAR" + str(users[i].player_number)
     threading.Thread(target=py_thread, daemon=True).start()
-
-    # threading.Thread(
-    #     target=race_loop, args=(users[0], None, race_data), daemon=True
-    # ).start()
+    race_loop(
+        users[0],
+        None,
+    )
 
     asyncio.run(run())
 
