@@ -1,6 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
+import subprocess
 from .models import Username
 from .serializer import UsernameSerializer
 from django.shortcuts import render
@@ -76,8 +77,10 @@ def update_user(request, pk):
 @api_view(['POST'])
 def start_race_views(request):
     try:
-        response = requests.post('http://localhost:5001/start-race')
-        return Response(response.json())
+     #  response = requests.post('http://localhost:5001/start-race')
+        subprocess.Popen(['python',
+                         'C:\\Users\\saija\\documents\\koulu\\kesaprojekti\\assembly-proju\\ai_and_controls\\Controls_test\\race_main.py'])
+        return Response({'message': 'Race started succesfully'})
     except Exception as e:
         return Response({'error': str(e)}, status=500)
     

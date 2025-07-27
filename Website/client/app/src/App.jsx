@@ -112,16 +112,16 @@ function App() {
       if (addedUsers && addedUsers.length > 0) {
         setUserIds(addedUsers.map(u => u.id));
 
-        const response = await fetch('http://localhost:8000/api/start/', {
+    /*  const response = await fetch('http://localhost:8000/api/start/', {
           method: 'POST',
         });
 
         if (!response.ok) {
           throw new Error('Failed to start race');
         }
-
-        const data = await response.json();
-        console.log(data.message);
+*/
+        // const data = await response.json();
+        // console.log(data.message);
 
         setSubmitted(true);
             
@@ -171,8 +171,15 @@ function App() {
 
   }, [isRunning]);
 
+  const handleCountdownComplete = () => {
+  fetch("http://127.0.0.1:8000/api/start/", {
+    method: "POST"
+  })
+    .then((res) => res.json())
+    .then((data) => console.log("Race started from backend.", data))
+    .catch((err) => console.error("Failed to start race", err));
 
-
+  };
 
       
   return (
@@ -307,6 +314,7 @@ function App() {
                             username2={username2}
                             userIds={userIds}
                             numLaps={numLaps}
+                            onCountdownComplete={handleCountdownComplete}
                             />
                         </div>
                         

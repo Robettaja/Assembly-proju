@@ -1,6 +1,6 @@
 import React, {useState, useRef, useEffect} from "react";
 
-const Countdown = ({onLap, onFinish, userIds, username1, username2, numLaps}) => {
+const Countdown = ({onLap, onFinish, userIds, username1, username2, numLaps, onCountdownComplete}) => {
     const [countdownTime, setCountdownTime] = useState(10);
     const [timerRunning, setTimerRunning] = useState(false);
     const [elapsedTime, setElapsedTime] = useState(0);
@@ -47,6 +47,7 @@ const Countdown = ({onLap, onFinish, userIds, username1, username2, numLaps}) =>
         if (countdownTime === 0) {
             clearInterval(countdownRef.current);
             setTimerRunning(true);
+            onCountdownComplete?.(); //laukaisee auton lähdön
         }
 
         return () => clearInterval(countdownRef.current);
@@ -145,6 +146,8 @@ const Countdown = ({onLap, onFinish, userIds, username1, username2, numLaps}) =>
             }),
         });
     };
+
+
 
     return (
         <div className="p4 text-center">
