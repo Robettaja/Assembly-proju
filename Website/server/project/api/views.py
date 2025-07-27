@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 import subprocess
 from .models import Username
-from .serializer import UsernameSerializer
+from .serializer import UsernameSerializer, SaveLapsSerializer, LapTimeSerializer, RaceSessionSerializer
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -84,6 +84,38 @@ def start_race_views(request):
     except Exception as e:
         return Response({'error': str(e)}, status=500)
     
+@api_view(['POST'])
+def lap_completed(request):
+    user_index = request.data.get('userIndex')  # 0 tai 1
+    if user_index is None:
+        return Response({'error': 'userIndex is required'}, status=400)
 
-    
+    # Voit halutessa logittaa, mitä tapahtui
+    print(f"Lap completed for user {user_index}")
+    # Tähän voisi lisätä logiikkaa esim. tallentaa backendissä
 
+    return Response({'status': 'Lap received'})
+
+@api_view(['POST'])
+def save_laps(request):
+    serializer = SaveLapsSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"message": "Lap times saved succesfully."}, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def bulk_create_laptimes(request):
+    serializer = LapTimeSerializer(data=request.data, many=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def save_race_session(request):
+    serializer = RaceSessionSerializer(data=request.data)
+    if serializer.is_valid():
+        race_session = serializer.save()
+        return Response(RaceSessionSerializer(race_session).data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  

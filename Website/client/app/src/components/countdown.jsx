@@ -74,8 +74,7 @@ const Countdown = ({onLap, onFinish, userIds, username1, username2, numLaps, onC
             const user1Total = formatElapsed(user1FinishRef.current - startTimeRef.current);
             const user2Total = formatElapsed(user2FinishRef.current - startTimeRef.current);
 
-            saveTotalTime(userIds[0], user1Total);
-            saveTotalTime(userIds[1], user2Total);
+            saveBothUsersData(user1Total, user2Total);
 
             onFinish && onFinish({
                 user1: user1Total,
@@ -122,32 +121,45 @@ const Countdown = ({onLap, onFinish, userIds, username1, username2, numLaps, onC
         }
     };
     
-    const saveLapTime = (userId, lapIndex, time) => {
-        const field = `lap${lapIndex + 1}`;
-        return fetch(`http://127.0.0.1:8000/api/usernames/${userId}/`, {
-            method: "PUT",
+const saveBothUsersData = async (user1Total, user2Total) => {
+    const payload = [
+        {
+            user_id: userIds[0],
+            total_time: user1Total,
+            laps: user1Laps.map((lap, index) => ({
+                lap_number: index + 1,
+                lap_time: lap
+            }))
+        },
+        {
+            user_id: userIds[1],
+            total_time: user2Total,
+            laps: user2Laps.map((lap, index) => ({
+                lap_number: index + 1,
+                lap_time: lap
+            }))
+        }
+    ];
+
+    try {
+        const response = await fetch("http://127.0.0.1:8000/api/save-laps/", {
+            method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-                [field]: time,
-            }),
+            body: JSON.stringify(payload)
         });
-    };
 
-    const saveTotalTime = (userId, total) => {
-        return fetch(`http://127.0.0.1:8000/api/usernames/${userId}/`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                total_time: total,
-            }),
-        });
-    };
+        if (!response.ok) {
+            throw new Error("Lap and total times saving failed");
+        }
 
-
+        const data = await response.json();
+        console.log("All lap times saved:", data);
+    } catch (error) {
+        console.error("Error saving laps:", error);
+    }
+};
 
     return (
         <div className="p4 text-center">

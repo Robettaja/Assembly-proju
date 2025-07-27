@@ -3,7 +3,9 @@ import threading
 import struct
 from bleak import BleakClient, BleakScanner
 from bleak.backends.winrt.client import BleakClientWinRT
-
+import json
+import requests
+import time
 import pygame
 
 import sys
@@ -21,6 +23,23 @@ users = []
 
 PLAYER_DEVICE_MAP = {}
 
+def save_lap_time(username, laps, total_time):
+    data = {
+        "usert": username,
+        "laps": laps,
+        "total_time": total_time,
+        
+    }
+
+    try:
+        response = requests.post("http://localhost:8000/api/save-laps", json = data)
+        if response.status_code == 201:
+            print(f"Lap time saved to backend for player {username}")
+        else:
+            print(f"Failed to save lap time: {response.status_code} {response.text}")
+    except requests.exceptions.RequestException as e:
+        print(f"Request error: {e}")
+    
 
 def race_over():
     for user in users:
