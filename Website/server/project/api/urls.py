@@ -11,5 +11,6 @@ urlpatterns = [
     path('lap/', views.lap_completed, name='lap_completed'),
     path('save-laps/', views.save_laps, name='save_laps'),
     path('laptimes/bulk_create/', bulk_create_laptimes, name='bulk_create_laptimes'),
-    path('race-sessions/save/', save_race_session, name='save_race_session')
+    path('race-sessions/save/', save_race_session, name='save_race_session'),
+    path('user-laps/<str:username>/', views.get_user_laptimes, name='user-laps')
 ]

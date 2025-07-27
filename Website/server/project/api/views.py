@@ -2,7 +2,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 import subprocess
-from .models import Username
+from .models import RaceSession, Username, LapTime
 from .serializer import UsernameSerializer, SaveLapsSerializer, LapTimeSerializer, RaceSessionSerializer
 from django.shortcuts import render
 from django.http import JsonResponse
@@ -96,6 +96,7 @@ def lap_completed(request):
 
     return Response({'status': 'Lap received'})
 
+
 @api_view(['POST'])
 def save_laps(request):
     serializer = SaveLapsSerializer(data=request.data)
@@ -118,4 +119,58 @@ def save_race_session(request):
     if serializer.is_valid():
         race_session = serializer.save()
         return Response(RaceSessionSerializer(race_session).data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)  
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
+
+@api_view(['GET'])
+def get_user_laptimes(request, username):
+    try:
+        user = Username.objects.get(user=username)
+    except Username.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    lap_times = user.lap_times.all().order_by('lap_number')
+    serializer = LapTimeSerializer(lap_times, many=True)
+
+    fastest_lap = min(
+        lap_times,
+        key=lambda lap: float(lap.lap_time.replace(',', ',')),
+        default=None
+    ) 
+
+    return Response({
+            'username': user.user,
+            'total_time': user.total_time,
+            'laps': serializer.data,
+            'fastest_lap': {
+                'lap_number': fastest_lap.lap_number,
+                'lap_time': fastest_lap.lap_time
+        } if fastest_lap else None
+    })
+
+@api_view(['GET'])
+def leaderboard_view(request):
+    users = Username.objects.all()
+    leaderboard = []
+
+    for user in users:
+        lap_times = LapTime.objects.filter(race_session__user=user)
+        if not lap_times.exists():
+            continue
+
+        fastest_lap = min(lap_times, key=lambda lap: parse_lap_time(lap.lap_time))
+        
+        leaderboard.append({
+            "user": user.user,
+            "fastest_lap": fastest_lap.lap_time
+        })
+    #lajittelee käyttäjän nopeimman kierrosajan mukaan
+    leaderboard.sort(key=lambda x: parse_lap_time(x["fastest_lap"]))    
+
+    return Response(leaderboard)
+
+def parse_lap_time(lap_time_str):
+    try: 
+        minutes, seconds, milliseconds = map(int, lap_time_str.split(":"))
+        return minutes * 60000 + seconds * 1000 + milliseconds * 10
+    except:
+        return float('inf') 

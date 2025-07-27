@@ -32,7 +32,6 @@ class RaceSessionSerializer(serializers.ModelSerializer):
 
         return race_session
 
-
 class SaveLapsSerializer(serializers.Serializer):
     user_id = serializers.IntegerField(required=False)
     user = serializers.CharField(required=False)
