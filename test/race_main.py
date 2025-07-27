@@ -6,10 +6,6 @@ from bleak.backends.winrt.client import BleakClientWinRT
 
 import pygame
 
-import sys
-import os
-
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 intersections = [True, True]
 frame_lock = threading.Lock()
@@ -96,15 +92,15 @@ def py_thread():
             pygame.event.pump()
             dt = clock.tick(60) / 1000
             for player in users:
-                joystick = joystics[player.controller_id]
                 if player.completedRace:
                     continue
-                if intersections[player.player_number]:
-                    player.raceTime += dt
-                else:
-                    joystick.rumble(1, 1, 4)  # Reset rumble
-                    player.raceTime += dt
-
+                with frame_lock:
+                    if intersections[player.player_number - 1]:
+                        player.raceTime += dt
+                    else:
+                        player.raceTime += dt * 2
+                joystick = joystics[player.controller_id]
+                # joystick.rumble(0.5, 0.5, 4)  # Reset rumble
                 x = joystick.get_axis(0) * player.speed
                 y = -joystick.get_axis(3) * player.speed
                 with controller_locks[player.player_number]:
@@ -169,32 +165,31 @@ async def run():
     await asyncio.gather(*tasks)
 
 
-from track_vision import race_loop, initialize_data
-
-
 def start_race():
+    from track_vision import race_loop, initialize_data
+
     users.append(User(1, "Player1", 0))
     # users.append(User(2, "Player2", 2))
-    race_data = RaceData(laps=1, clockwise=False)
-
-    if not check_controllers():
-        print(
-            "\033[91m[ABORTING] One or more controllers are missing. Race cannot start.\033[0m"
-        )
-        return
-    for i in range(len(users)):
-        controller_locks[i + 1] = threading.Lock()
-        DEVICES.append("CAR" + str(users[i].player_number))
-        PLAYER_DEVICE_MAP[i + 1] = "CAR" + str(users[i].player_number)
-    threading.Thread(target=py_thread, daemon=True).start()
+    # race_data = RaceData(laps=1, clockwise=False)
+    #
+    # if not check_controllers():
+    #     print(
+    #         "\033[91m[ABORTING] One or more controllers are missing. Race cannot start.\033[0m"
+    #     )
+    #     return
+    # for i in range(len(users)):
+    #     controller_locks[i + 1] = threading.Lock()
+    #     DEVICES.append("CAR" + str(users[i].player_number))
+    #     PLAYER_DEVICE_MAP[i + 1] = "CAR" + str(users[i].player_number)
+    # threading.Thread(target=py_thread, daemon=True).start()
     race_loop(
         users[0],
         None,
     )
+    while True:
+        pass
 
-    asyncio.run(run())
-
-    # initialize_data()
+    # asyncio.run(run())
 
 
 if __name__ == "__main__":
