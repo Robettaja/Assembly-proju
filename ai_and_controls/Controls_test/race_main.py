@@ -13,7 +13,6 @@ import os
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-intersections = [True, True]
 frame_lock = threading.Lock()
 
 frame_lock = threading.Lock()
@@ -48,11 +47,6 @@ def race_over():
     return True
 
 
-def set_user_intersection(index, value):
-    with frame_lock:
-        intersections[index] = value
-
-
 class RaceData:
     def __init__(self, laps: int = 1, clockwise: bool = False):
         self.laps = laps  # Kuinka monta kierrosta radalla ajetaan
@@ -71,6 +65,7 @@ class User:
         self.arucoID = arucoID
         self.raceTime = 0
         self.is_player = is_player
+        self.is_on_track = True
         self.completedRace = False
         self.lapTimes = []
         self.nextCheckpointIndex = 0
@@ -118,11 +113,13 @@ def py_thread():
                 joystick = joystics[player.controller_id]
                 if player.completedRace:
                     continue
-                if intersections[player.player_number]:
+                if player.is_on_track:
                     player.raceTime += dt
+                    player.speed = 1
                 else:
                     joystick.rumble(1, 1, 4)  # Reset rumble
-                    player.raceTime += dt
+                    player.raceTime += dt * 2
+                    player.speed = 0.5
 
                 x = joystick.get_axis(0) * player.speed
                 y = -joystick.get_axis(3) * player.speed
@@ -211,9 +208,7 @@ def start_race():
         None,
     )
 
-    asyncio.run(run())
-
-    # initialize_data()
+    # asyncio.run(run())
 
 
 if __name__ == "__main__":

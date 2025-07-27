@@ -151,7 +151,7 @@ def get_track_mask(image):
     blur = cv.GaussianBlur(gray, (21, 21), 0)
 
     inv = cv.bitwise_not(blur)
-    ret, thresh = cv.threshold(inv, 98, 255, cv.THRESH_BINARY)
+    ret, thresh = cv.threshold(inv, 95, 255, cv.THRESH_BINARY)
     kernel = np.ones((1, 1), np.uint8)
     dilated = cv.dilate(thresh, kernel, iterations=2)
     contours, _ = cv.findContours(dilated, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
@@ -167,6 +167,7 @@ def get_track_mask(image):
 
 
 def get_finishline(img):
+    img = cv.resize(img, (1280, 640))
     img2 = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     img = cv.cvtColor(img, cv.COLOR_BGR2HSV)
     img = cv.GaussianBlur(img, (5, 5), 0)
@@ -347,8 +348,6 @@ def save_checkpoints():
 
 
 def race_analyze(player1, player2=None, race_data=RaceData(1, False)):
-    from race_main import set_user_intersection
-
     users = [player1]
     if player2:
         users.append(player2)
@@ -435,10 +434,10 @@ def race_analyze(player1, player2=None, race_data=RaceData(1, False)):
                 last_car = mask
                 if is_intersecting(last_car, track):
                     with lock:
-                        set_user_intersection(0, True)
+                        user.is_on_track = True
                 else:
                     with lock:
-                        set_user_intersection(0, False)
+                        user.is_on_track = False
 
             if user.nextCheckpointIndex < len(checkpoints) and is_intersecting(
                 last_car, checkpoints[user.nextCheckpointIndex]
@@ -483,21 +482,18 @@ def initialize_data():
         print("[FAIL] Could not reach the Raspberry Pi on any IP.")
         return
     frame = cv.imread("Track data/track.jpg")
-    frame = cv.resize(frame, (1280, 640))
+    # frame = cv.resize(frame, (1280, 640))
     if not Path(TRACK_PATH).exists():
         track_mask = get_track_mask(frame)
+        track_mask = cv.resize(track_mask, (1280, 640))
         cv.imwrite(TRACK_PATH, track_mask)
     if not Path(FINISHLINE_PATH).exists():
         line = get_finishline(frame)
+        line = cv.resize(line, (1280, 640))
         cv.imwrite(FINISHLINE_PATH, line)
     if Path(TRACK_PATH).exists() and Path(FINISHLINE_PATH).exists():
         save_checkpoints()
-    cv.imwrite("Track data/reference.jpg", frame)
-    save_checkpoints()
 
 
 if __name__ == "__main__":
     initialize_data()
-    pass
-    # save_track_data()
-    # user1 = User(pygame.joystick.Joystick(0), "Player 1")
