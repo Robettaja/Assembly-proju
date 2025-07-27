@@ -9,7 +9,7 @@ from pathlib import Path
 
 line_pos_x = ""
 line_pos_y = ""
-frame_queue = queue.Queue(maxsize=5)
+frame_queue = queue.Queue(maxsize=1)
 
 
 class RaceData:
@@ -61,6 +61,8 @@ def read_frames():
         "tcp",
         "-i",
         rtsp,
+        "-fps_mode",
+        "passthrough",
         "-f",
         "rawvideo",
         "-pix_fmt",
@@ -433,11 +435,9 @@ def race_analyze(player1, player2=None, race_data=RaceData(1, False)):
                 last_car = mask
                 if is_intersecting(last_car, track):
                     with lock:
-                        print("on track")
                         set_user_intersection(0, True)
                 else:
                     with lock:
-                        print("on track")
                         set_user_intersection(0, False)
 
             if user.nextCheckpointIndex < len(checkpoints) and is_intersecting(
@@ -482,7 +482,6 @@ def initialize_data():
     else:
         print("[FAIL] Could not reach the Raspberry Pi on any IP.")
         return
-
     frame = cv.imread("Track data/track.jpg")
     frame = cv.resize(frame, (1280, 640))
     if not Path(TRACK_PATH).exists():
