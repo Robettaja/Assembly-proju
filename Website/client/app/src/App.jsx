@@ -12,8 +12,6 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
 function App() {
   const [usernames, setUsernames] = useState([]);
-  const [user, setUser] = useState("");
-  const [email, setEmail] = useState("");
   const [username1, setUsername1] = useState("");
   const [username2, setUsername2] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -247,7 +245,7 @@ function App() {
                         <div className="flex flex-col md:flex-row gap-8 items-center justify-center w-full">
                           <div className="input-container">
                             <label>
-                              <p className="font-bold uppercase ">Player 1:</p>
+                              <p className="font-bold uppercase ">Player:</p>
                               <input
                                 type ="text"
                                 value={username1}

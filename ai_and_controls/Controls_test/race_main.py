@@ -25,7 +25,7 @@ PLAYER_DEVICE_MAP = {}
 
 def save_lap_time(username, laps, total_time):
     data = {
-        "usert": username,
+        "user": username,
         "laps": laps,
         "total_time": total_time,
     }

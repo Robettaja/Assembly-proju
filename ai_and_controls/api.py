@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-
+import threading
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -7,14 +7,18 @@ from Controls_test.race_main import start_race
 
 
 app = Flask(__name__)
+race_thread = None
 
 @app.route("/start-race", methods=["POST"])
 def start_race_route():
+    global race_thread
+    if race_thread is not None and race_thread.is_alive():
+        return jsonify({"statu": "Race already running"}), 400
+    
     try:
-        print("Starting race...")
-        start_race()
-        # tähän kutsutaan funktio
-        
+        print("Starting race in background thread...")
+        race_thread = threading.Thread(target=start_race)
+        race_thread.start()
         return jsonify({"status": "Race started"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
