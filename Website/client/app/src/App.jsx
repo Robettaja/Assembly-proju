@@ -256,20 +256,6 @@ function App() {
                               />
                             </label>
                           </div>
-                          
-                          
-
-                          <div className="input-container">
-                            <label>
-                              <p className="font-bold uppercase ">Player 2:</p>
-                              <input
-                                type ="text"
-                                value={username2}
-                                onChange={(e) => setUsername2(e.target.value)}
-                                required
-                                />
-                            </label>
-                          </div>
                         </div>
 
                         <div className='lap-numbers'>
@@ -311,10 +297,11 @@ function App() {
                         <div className= "display-container">
                           <Countdown
                             username1={username1}
-                            username2={username2}
                             userIds={userIds}
                             numLaps={numLaps}
                             onCountdownComplete={handleCountdownComplete}
+                            onLap={() => {}}
+                            onFinish={() => {}}
                             />
                         </div>
                         

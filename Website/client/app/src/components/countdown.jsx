@@ -1,23 +1,19 @@
 import React, { useState, useRef, useEffect } from "react";
 
-const Countdown = ({ onLap, onFinish, userIds, username1, username2, numLaps, onCountdownComplete }) => {
-    const [countdownTime, setCountdownTime] = useState(10);
+const Countdown = ({ onLap, onFinish, userIds, username1, numLaps, onCountdownComplete }) => {
+    const [countdownTime, setCountdownTime] = useState(2);
     const [timerRunning, setTimerRunning] = useState(false);
     const [elapsedTime, setElapsedTime] = useState(0);
 
     const [user1Laps, setUser1Laps] = useState([]);
-    const [user2Laps, setUser2Laps] = useState([]);
-
     const [user1Finished, setUser1Finished] = useState(false);
-    const [user2Finished, setUser2Finished] = useState(false);
 
+    const hasSavedRef = useRef(false);
     const countdownRef = useRef(null);
     const timerIntervalRef = useRef(null);
     const startTimeRef = useRef(null);
-    const lapStartTimeRefs = useRef([null, null]);
-
+    const lapStartTimeRef = useRef(null);
     const user1FinishRef = useRef(null);
-    const user2FinishRef = useRef(null);
 
     const formatElapsed = (ms) => {
         const minutes = String(Math.floor(ms / 60000) % 60).padStart(2, "0");
@@ -45,7 +41,7 @@ const Countdown = ({ onLap, onFinish, userIds, username1, username2, numLaps, on
     useEffect(() => {
         if (timerRunning) {
             startTimeRef.current = Date.now();
-            lapStartTimeRefs.current = [Date.now(), Date.now()];
+            lapStartTimeRef.current = Date.now();
             timerIntervalRef.current = setInterval(() => {
                 setElapsedTime(Date.now() - startTimeRef.current);
             }, 10);
@@ -55,25 +51,23 @@ const Countdown = ({ onLap, onFinish, userIds, username1, username2, numLaps, on
     }, [timerRunning]);
 
     useEffect(() => {
-        if (user1Finished && user2Finished) {
+        if (user1Finished && !hasSavedRef.current) {
+            hasSavedRef.current = true;
             clearInterval(timerIntervalRef.current);
             const user1Total = formatElapsed(user1FinishRef.current - startTimeRef.current);
-            const user2Total = formatElapsed(user2FinishRef.current - startTimeRef.current);
-            sendLapData([
-                {
-                    user_id: userIds[0],
-                    total_time: user1Total,
-                    laps: user1Laps.map((lap, i) => ({ lap_number: i + 1, lap_time: lap })),
-                },
-                {
-                    user_id: userIds[1],
-                    total_time: user2Total,
-                    laps: user2Laps.map((lap, i) => ({ lap_number: i + 1, lap_time: lap })),
-                },
-            ]);
-            onFinish && onFinish({ user1: user1Total, user2: user2Total });
+
+            sendLapData({
+                user_id: userIds[0],
+                total_time: user1Total,
+                laps: user1Laps.map((lap, i) => ({
+                    lap_number: i + 1,
+                    lap_time: lap,
+                })),
+            });
+
+            onFinish?.({ user1Total });
         }
-    }, [user1Finished, user2Finished]);
+    }, [user1Finished]);
 
     const sendLapData = async (data) => {
         try {
@@ -91,87 +85,52 @@ const Countdown = ({ onLap, onFinish, userIds, username1, username2, numLaps, on
         }
     };
 
-    const handleLap = (userIndex) => {
+    const handleLap = () => {
         const now = Date.now();
-        const lapDuration = now - lapStartTimeRefs.current[userIndex];
-        lapStartTimeRefs.current[userIndex] = now;
+        const lapDuration = now - lapStartTimeRef.current;
+        lapStartTimeRef.current = now;
         const formattedLapTime = formatElapsed(lapDuration);
 
-        if (userIndex === 0) {
-            setUser1Laps((prev) => {
-                const updated = [...prev, formattedLapTime];
-                onLap && onLap(0, formattedLapTime);
+        setUser1Laps((prev) => {
+            const updated = [...prev, formattedLapTime];
+            onLap?.(0, formattedLapTime);
 
+            if (updated.length === numLaps) {
+                setUser1Finished(true);
+                user1FinishRef.current = now;
+            }
 
-
-                if (updated.length === numLaps) {
-                    setUser1Finished(true);
-                    user1FinishRef.current = now;
-                }
-                return updated;
-            });
-        }
-
-        if (userIndex === 1) {
-            setUser2Laps((prev) => {
-                const updated = [...prev, formattedLapTime];
-                onLap && onLap(1, formattedLapTime);
-
-
-                if (updated.length === numLaps) {
-                    setUser2Finished(true);
-                    user2FinishRef.current = now;
-                }
-                return updated;
-            });
-    
-        }
+            return updated;
+        });
     };
-    
 
     return (
         <div className="p4 text-center">
-            <h2 className="text-x1 mb-2">Countdown / timer</h2>
-            <div className="text-4x1 font-bold mb-4">
+            <h2 className="text-xl mb-2">Countdown / timer</h2>
+            <div className="text-4xl font-bold mb-4">
                 {countdownTime > 0 ? countdownTime : formatElapsed(elapsedTime)}
             </div>
 
             {countdownTime === 0 && timerRunning && (
                 <div className="flex justify-center gap-6">
-                    {/* User 1 */}
                     <div>
                         <h3>{username1}</h3>
                         <button
-                            onClick={() => handleLap(0)}
+                            onClick={handleLap}
                             disabled={user1Laps.length >= numLaps}
                             className="bg-blue-500 text-white px-4 py-2 rounded mb-2"
                         >
                             Lap
                         </button>
                         <h3>Laps:</h3>
-                        <ul>{user1Laps.map((lap, i) => <li key={i}>{lap}</li>)}</ul>
+                        <ul>
+                            {user1Laps.map((lap, i) => (
+                                <li key={i}>{lap}</li>
+                            ))}
+                        </ul>
                         {user1Laps.length === numLaps && (
                             <div>
                                 Total time: {formatElapsed(user1FinishRef.current - startTimeRef.current)}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* User 2 */}
-                    <div>
-                        <h3>{username2}</h3>
-                        <button
-                            onClick={() => handleLap(1)}
-                            disabled={user2Laps.length >= numLaps}
-                            className="bg-green-500 text-white px-4 py-2 rounded mb-2"
-                        >
-                            Lap
-                        </button>
-                        <h3>Laps:</h3>
-                        <ul>{user2Laps.map((lap, i) => <li key={i}>{lap}</li>)}</ul>
-                        {user2Laps.length === numLaps && (
-                            <div>
-                                Total time: {formatElapsed(user2FinishRef.current - startTimeRef.current)}
                             </div>
                         )}
                     </div>

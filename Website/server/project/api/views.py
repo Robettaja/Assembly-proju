@@ -166,6 +166,7 @@ def leaderboard_view(request):
         fastest_lap = min(lap_times, key=lambda lap: parse_lap_time(lap.lap_time))
         
         leaderboard.append({
+            "id": user.id,
             "user": user.user,
             "fastest_lap": fastest_lap.lap_time
         })

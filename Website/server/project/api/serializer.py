@@ -66,15 +66,18 @@ class SaveLapsSerializer(serializers.Serializer):
         else:
             raise serializers.ValidationError("Either user_id or user must be provided")
         
+        LapTime.objects.filter(user=user).delete()
+
+        fastest_lap = min(laps_data, key=lambda lap: lap['lap_time'])
+                          
+        LapTime.objects.create(
+            user=user,
+            lap_number=fastest_lap['lap_number'],
+            lap_time=fastest_lap['lap_time'],
+        )
+
         user.total_time = total_time
         user.save()
 
-       
-        for lap in laps_data:
-            LapTime.objects.create(
-                user=user,
-                lap_number=lap['lap_number'],
-                lap_time=lap['lap_time'],
-            )
-
+     
         return validated_data

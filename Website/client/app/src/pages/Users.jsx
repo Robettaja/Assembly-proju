@@ -6,7 +6,7 @@ import Pagination from '../components/pagination'
 
 
 
-const Users = ({deleteUser}) => {
+const Users = () => {
 
     const [search, setSearch] = useState("");
     const [users, setUsers] = useState([]);
@@ -24,9 +24,25 @@ const Users = ({deleteUser}) => {
                 console.error("Failed to fetch leaderboard:", error);
             }
         };
+        
         fetchLeaderboard();
     }, []);
   
+    const deleteUser = async (id) => {
+        const confirmed = window.confirm("Are you sure you want to delete this user?");
+        if (!confirmed) return;
+        try {
+        
+        const response = await fetch(`http://127.0.0.1:8000/api/usernames/${id}/`, {
+            method: "DELETE",
+            });
+        
+
+        setUsers((prev) => prev.filter((user) => user.id !== id));
+        }catch (err) {
+            console.log("Failed to delete user:", err);
+            }  
+        }
 
 
     const filteredUsers = users.filter((user) =>
