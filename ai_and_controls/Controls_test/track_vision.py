@@ -11,6 +11,8 @@ line_pos_x = ""
 line_pos_y = ""
 frame_queue = queue.Queue(maxsize=1)
 
+user = None
+
 
 class RaceData:
     def __init__(self, laps: int, clockwise: bool):
@@ -43,6 +45,7 @@ def try_request(ip):
 
 
 def read_frames():
+    global user
     rtsp = "rtsp://raspberrypi:8554/cam1"
 
     cmd = [
@@ -77,21 +80,28 @@ def read_frames():
 
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, bufsize=10**8)
     while True:
-        if process.stdout:
-            raw_frame = process.stdout.read(frame_size)
-            if len(raw_frame) != frame_size:
-                print("Frame incomplete or stream ended")
+        try:
+            if user and user.completedRace:
                 break
+            if process.stdout:
+                raw_frame = process.stdout.read(frame_size)
+                if len(raw_frame) != frame_size:
+                    print("Frame incomplete or stream ended")
+                    break
 
-            frame = np.frombuffer(raw_frame, dtype=np.uint8).reshape((height, width, 3))
-            try:
-                frame_queue.put_nowait(frame)
-            except queue.Full:
+                frame = np.frombuffer(raw_frame, dtype=np.uint8).reshape(
+                    (height, width, 3)
+                )
                 try:
-                    frame_queue.get_nowait()
                     frame_queue.put_nowait(frame)
                 except queue.Full:
-                    pass
+                    try:
+                        frame_queue.get_nowait()
+                        frame_queue.put_nowait(frame)
+                    except queue.Full:
+                        pass
+        except Exception as e:
+            pass
 
 
 def get_line_orientation(line):
@@ -347,10 +357,8 @@ def save_checkpoints():
     cv.imwrite("Track data/checkpoint2.jpg", checkpoint2)
 
 
-def race_analyze(player1, player2=None, race_data=RaceData(1, False)):
+def race_analyze(player1, race_data=RaceData(1, False)):
     users = [player1]
-    if player2:
-        users.append(player2)
     RESIZE_WIDTH = 1280
     RESIZE_HEIGHT = 640
 
@@ -461,12 +469,14 @@ def race_analyze(player1, player2=None, race_data=RaceData(1, False)):
             break
 
 
-def race_loop(player1, player2=None, race_data=RaceData(1, False)):
+def race_loop(player1, race_data):
+    user = player1
     vid_read = threading.Thread(target=read_frames, daemon=True)
-    vid_analyze = threading.Thread(target=race_analyze, args=(player1,), daemon=True)
+    vid_analyze = threading.Thread(
+        target=race_analyze, args=(player1, race_data), daemon=True
+    )
     vid_read.start()
     vid_analyze.start()
-    vid_analyze.join()
 
 
 def initialize_data():

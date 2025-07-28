@@ -8,13 +8,13 @@ BLECharacteristic rxChar("abcdefab-cdef-1234-5678-abcdefabcdef", BLEWriteWithout
 
 Servo servo;
 
-const char *carName = "CAR1";
+const char *carName = "CAR2";
 
 const int ROTATION_AMOUNT = 30;
-const int DEFAULT_ROTATION = 90;
+const int DEFAULT_ROTATION = 98;
 
-const int MIN_POWER = 20;
-int MAX_POWER = 24;
+const int MIN_POWER = 24;
+int MAX_POWER = 28;
 
 const int SERVO_PIN = 10;
 const int MOTOR_DIR_PIN = 11;
@@ -93,10 +93,10 @@ void loop()
           currentY = moveTowardsTarget(currentY, y, 0.01, deltaTime);
 
           if(currentX > 0.5 || currentX < -0.5) {
-              MAX_POWER = 30 ;
+              MAX_POWER = 40 ;
           } 
           else {
-              MAX_POWER = 24;
+              MAX_POWER = 34;
           }
 
           if (currentX > 0.05)
@@ -118,13 +118,13 @@ void loop()
           {
             Serial.println("moving...");
             analogWrite(MOTOR_POWER_PIN, (int)(((fabs(currentY) - 0.05) / (1.0 - 0.05)) * (MAX_POWER - MIN_POWER) + MIN_POWER));
-            digitalWrite(MOTOR_DIR_PIN, LOW);
+            digitalWrite(MOTOR_DIR_PIN, HIGH);
           }
           else if (currentY < -0.05)
           {
 
             analogWrite(MOTOR_POWER_PIN, (int)(((fabs(currentY) - 0.05) / (1.0 - 0.05)) * (MAX_POWER - MIN_POWER) + MIN_POWER));
-            digitalWrite(MOTOR_DIR_PIN, HIGH);
+            digitalWrite(MOTOR_DIR_PIN, LOW);
           }
           else
           {

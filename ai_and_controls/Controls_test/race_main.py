@@ -61,12 +61,12 @@ class RaceData:
 class User:
     def __init__(
         self,
-        player_number: int,  # Esim pelaaja 1 2
+        car_num: int,
         name: str,  # Pelaajan nimi
         arucoID: int,  # Mitä autoa pelaaja ohjaa (määritetään myöhemmin)
         is_player: bool = True,  # Onko pelaaja vai tekoäly Vain pelaaja 2 kohdalla mahdollinen valita
     ):
-        self.player_number = player_number
+        self.car_num = car_num
         self.arucoID = arucoID
         self.raceTime = 0
         self.is_player = is_player
@@ -77,7 +77,7 @@ class User:
         self.lapsCompleted = 0
         self.name = name
         self.speed = 1.0
-        self.controller_id = player_number - 1
+        self.controller_id = 0
 
         def __hash__(self):
             return hash((self.id, self.name))
@@ -128,8 +128,8 @@ def py_thread():
 
                 x = joystick.get_axis(0) * player.speed
                 y = -joystick.get_axis(3) * player.speed
-                with controller_locks[player.player_number]:
-                    controller_inputs[player.player_number] = (x, y)
+                with controller_locks[0]:
+                    controller_inputs[0] = (x, y)
             if race_over():
                 break
 
@@ -151,8 +151,8 @@ async def handle_device(device, player_number):
 
         while True:
             try:
-                with controller_locks[player_number]:
-                    x, y = controller_inputs.get(player_number, (0.0, 0.0))
+                with controller_locks[0]:
+                    x, y = controller_inputs.get(0, (0.0, 0.0))
 
                 payload = struct.pack("ff", x, y)
                 await client.write_gatt_char(CHAR_UUID, payload, response=False)
@@ -194,8 +194,7 @@ from track_vision import race_loop, initialize_data
 
 
 def start_race():
-    users.append(User(1, "Player1", 0))
-    # users.append(User(2, "Player2", 2))
+    users.append(User(2, "Player1", 0))
     race_data = RaceData(laps=1, clockwise=False)
 
     if not check_controllers():
@@ -204,16 +203,13 @@ def start_race():
         )
         return
     for i in range(len(users)):
-        controller_locks[i + 1] = threading.Lock()
-        DEVICES.append("CAR" + str(users[i].player_number))
-        PLAYER_DEVICE_MAP[i + 1] = "CAR" + str(users[i].player_number)
+        controller_locks[i] = threading.Lock()
+        DEVICES.append("CAR" + str(users[0].car_num))
+        PLAYER_DEVICE_MAP[i + 1] = "CAR" + str(users[0].car_num)
     threading.Thread(target=py_thread, daemon=True).start()
-    race_loop(
-        users[0],
-        None,
-    )
+    race_loop(users[0], race_data)
 
-    # asyncio.run(run())
+    asyncio.run(run())
 
 
 if __name__ == "__main__":
