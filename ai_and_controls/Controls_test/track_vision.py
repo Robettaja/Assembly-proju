@@ -77,26 +77,21 @@ def read_frames():
 
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, bufsize=10**8)
     while True:
-        try:
-            if process.stdout:
-                raw_frame = process.stdout.read(frame_size)
-                if len(raw_frame) != frame_size:
-                    print("Frame incomplete or stream ended")
-                    break
+        if process.stdout:
+            raw_frame = process.stdout.read(frame_size)
+            if len(raw_frame) != frame_size:
+                print("Frame incomplete or stream ended")
+                break
 
-                frame = np.frombuffer(raw_frame, dtype=np.uint8).reshape(
-                    (height, width, 3)
-                )
+            frame = np.frombuffer(raw_frame, dtype=np.uint8).reshape((height, width, 3))
+            try:
+                frame_queue.put_nowait(frame)
+            except queue.Full:
                 try:
+                    frame_queue.get_nowait()
                     frame_queue.put_nowait(frame)
                 except queue.Full:
-                    try:
-                        frame_queue.get_nowait()
-                        frame_queue.put_nowait(frame)
-                    except queue.Full:
-                        pass
-        except Exception as e:
-            print("\033[91m[ERROR]\033[0m Reading frame failed:", e)
+                    pass
 
 
 def get_line_orientation(line):
