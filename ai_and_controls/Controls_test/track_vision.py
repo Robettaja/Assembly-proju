@@ -27,7 +27,7 @@ def try_request(ip):
     SAVE_PATH = "Track data/track.jpg"
     try:
         url = f"http://{ip}:{PORT}/snapshot"
-        print(f"[INFO] Trying: {url}")
+        print("\033[94m[INFO]\033[0m Trying: {url}")
         response = requests.get(url, timeout=15)
 
         if response.status_code == 200:
@@ -36,9 +36,9 @@ def try_request(ip):
             print(f"[SUCCESS] Snapshot saved to {SAVE_PATH} from {ip}")
             return True
         else:
-            print(f"[ERROR] HTTP {response.status_code} from {ip}")
+            print("\033[91m[ERROR]\033[0m HTTP {response.status_code} from {ip}")
     except requests.RequestException as e:
-        print(f"[WARN] Failed to reach {ip}: {e}")
+        print("\033[93m[WARN]\033[0m Failed to reach {ip}: {e}")
     return False
 
 
@@ -77,21 +77,26 @@ def read_frames():
 
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, bufsize=10**8)
     while True:
-        if process.stdout:
-            raw_frame = process.stdout.read(frame_size)
-            if len(raw_frame) != frame_size:
-                print("Frame incomplete or stream ended")
-                break
+        try:
+            if process.stdout:
+                raw_frame = process.stdout.read(frame_size)
+                if len(raw_frame) != frame_size:
+                    print("Frame incomplete or stream ended")
+                    break
 
-            frame = np.frombuffer(raw_frame, dtype=np.uint8).reshape((height, width, 3))
-            try:
-                frame_queue.put_nowait(frame)
-            except queue.Full:
+                frame = np.frombuffer(raw_frame, dtype=np.uint8).reshape(
+                    (height, width, 3)
+                )
                 try:
-                    frame_queue.get_nowait()
                     frame_queue.put_nowait(frame)
                 except queue.Full:
-                    pass
+                    try:
+                        frame_queue.get_nowait()
+                        frame_queue.put_nowait(frame)
+                    except queue.Full:
+                        pass
+        except Exception as e:
+            print("\033[91m[ERROR]\033[0m Reading frame failed:", e)
 
 
 def get_line_orientation(line):
@@ -479,7 +484,7 @@ def initialize_data():
         if try_request(ip):
             break
     else:
-        print("[FAIL] Could not reach the Raspberry Pi on any IP.")
+        print("\033[91m[FAIL]\033[0m Could not reach the Raspberry Pi on any IP.")
         return
     frame = cv.imread("Track data/track.jpg")
     # frame = cv.resize(frame, (1280, 640))

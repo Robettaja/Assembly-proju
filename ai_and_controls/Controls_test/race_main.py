@@ -22,23 +22,28 @@ users = []
 
 PLAYER_DEVICE_MAP = {}
 
+
 def save_lap_time(username, laps, total_time):
     data = {
         "usert": username,
         "laps": laps,
         "total_time": total_time,
-        
     }
 
     try:
-        response = requests.post("http://localhost:8000/api/save-laps", json = data)
+        response = requests.post("http://localhost:8000/api/save-laps", json=data)
         if response.status_code == 201:
-            print(f"Lap time saved to backend for player {username}")
+            print(
+                f"\033[94m[INFO]\033[0mLap time saved to backend for player {username}"
+            )
         else:
-            print(f"Failed to save lap time: {response.status_code} {response.text}")
+            print(
+                f"\033[91m[ERROR]Failed to save lap time: {response.status_code} {response.text}"
+                "\033[0m"
+            )
     except requests.exceptions.RequestException as e:
-        print(f"Request error: {e}")
-    
+        print(f"\033[91m[ERROR]Request error: {e}\033[0m")
+
 
 def race_over():
     for user in users:
@@ -140,7 +145,7 @@ DEVICES = []
 
 async def handle_device(device, player_number):
     async with BleakClient(device.address) as client:
-        print(f"[{device.name}] Connected to BLE")
+        print(f"\033[94m[INFO]\033[0m [{device.name}] Connected to BLE")
 
         await asyncio.sleep(0.1)  # let connection stabilize
 
@@ -164,12 +169,12 @@ async def handle_device(device, player_number):
 async def run():
     global x_input, y_input, frame_lock
 
-    print("Scanning for device...")
+    print("\033[94m[INFO]\033[0m Scanning for device...")
     devices = await BleakScanner.discover()
     devices = [d for d in devices if d.name in DEVICES]
 
     if not devices:
-        print("Device not found.")
+        print("\033[91m[ERROR] Device not found.\033[0m")
         return
     tasks = []
     for player_number, device_name in PLAYER_DEVICE_MAP.items():
