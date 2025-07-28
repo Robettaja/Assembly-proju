@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import get_usernames, create_usernames, usernames_detail, create_multiple_usernames, bulk_create_laptimes, save_race_session
+from .views import get_usernames, create_usernames, usernames_detail, create_multiple_usernames, bulk_create_laptimes, save_race_session, leaderboard_view, save_laps
 from . import views
 
 urlpatterns = [
@@ -9,8 +9,9 @@ urlpatterns = [
     path('usernames/<int:pk>/', usernames_detail, name='usernames_detail'),
     path('start/', views.start_race_views),
     path('lap/', views.lap_completed, name='lap_completed'),
-    path('save-laps/', views.save_laps, name='save_laps'),
+    path('save-laps/', save_laps, name='save_laps'),
     path('laptimes/bulk_create/', bulk_create_laptimes, name='bulk_create_laptimes'),
     path('race-sessions/save/', save_race_session, name='save_race_session'),
-    path('user-laps/<str:username>/', views.get_user_laptimes, name='user-laps')
+    path('user-laps/<str:username>/', views.get_user_laptimes, name='user-laps'),
+    path('leaderboard/', leaderboard_view, name='leaderboard')
 ]

@@ -1,15 +1,20 @@
 from rest_framework import serializers
 from .models import Username, LapTime, RaceSession
 
-class UsernameSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Username
-        fields = '__all__'
+
         
 class LapTimeSerializer(serializers.ModelSerializer):
     class Meta:
         model = LapTime
         fields = ['lap_number', 'lap_time']
+
+class UsernameSerializer(serializers.ModelSerializer):
+    lap_times = LapTimeSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = Username
+        fields = ['id', 'user', 'lap_times']
+
 
 class RaceSessionSerializer(serializers.ModelSerializer):
     lap_times = LapTimeSerializer(many=True)
@@ -39,6 +44,12 @@ class SaveLapsSerializer(serializers.Serializer):
     laps = LapTimeSerializer(many=True)
 
     def create(self, validated_data):
+        if isinstance(validated_data, list):
+            result = []
+            for item in validated_data:
+                result.append(self.create(item))
+            return result
+        
         user_id = validated_data.get('user_id', None)
         username = validated_data.get('user', None)
         total_time = validated_data['total_time']
@@ -50,7 +61,7 @@ class SaveLapsSerializer(serializers.Serializer):
             except Username.DoesNotExist:
                 raise serializers.ValidationError("User with given ID does not exist")
         
-        elif username: 
+        elif username:
             user, created = Username.objects.get_or_create(user=username)
         else:
             raise serializers.ValidationError("Either user_id or user must be provided")
@@ -58,8 +69,7 @@ class SaveLapsSerializer(serializers.Serializer):
         user.total_time = total_time
         user.save()
 
-
-
+       
         for lap in laps_data:
             LapTime.objects.create(
                 user=user,

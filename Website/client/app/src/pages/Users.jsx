@@ -6,20 +6,32 @@ import Pagination from '../components/pagination'
 
 
 
-const Users = ({usernames, deleteUser}) => {
+const Users = ({deleteUser}) => {
 
     const [search, setSearch] = useState("");
-    const [names, setNames] = useState([]);
+    const [users, setUsers] = useState([]);
 
     const [currentPage, setCurrentPage] = useState(1);
     const [namesPerPage] = useState(10);
 
- 
+     useEffect(() => {
+        const fetchLeaderboard = async () => {
+            try {
+                const res = await fetch("http://127.0.0.1:8000/api/leaderboard/");
+                const data = await res.json();
+                setUsers(data);
+            } catch (error) {
+                console.error("Failed to fetch leaderboard:", error);
+            }
+        };
+        fetchLeaderboard();
+    }, []);
+  
 
 
-    const filteredUsers = usernames.filter((username) =>
-        username.user.toLowerCase().includes(search.toLowerCase()) ||
-        (username.email && username.email.toLowerCase().includes(search.toLowerCase()))
+    const filteredUsers = users.filter((user) =>
+        user.user.toLowerCase().includes(search.toLowerCase())
+        
     );
 
     const indexOfLastNames = currentPage * namesPerPage;
@@ -27,17 +39,17 @@ const Users = ({usernames, deleteUser}) => {
     const currentUsers = filteredUsers.slice(indexOfFirstNames, indexOfLastNames);
 
 
-    useEffect (() => {
-        const fetchNames = async () => {
-            const res = await fetch("http://127.0.0.1:8000/api/usernames/");
-            const data = await res.json();
-            setNames(data);
-        };
+    // useEffect (() => {
+    //     const fetchNames = async () => {
+    //         const res = await fetch("http://127.0.0.1:8000/api/usernames/");
+    //         const data = await res.json();
+    //         setNames(data);
+    //     };
 
-        fetchNames();
-    }, []);
+    //     fetchNames();
+    // }, []);
 
-  
+
 
     return (
         <>
@@ -75,20 +87,20 @@ const Users = ({usernames, deleteUser}) => {
 
             <div className='flex flex-col gap-4'>
                 
-                {currentUsers.map((username) => (
+                {currentUsers.map((user) => (
                     <div className="flex justify-between items-center border border-gray-300 rounded-lg p-4 shadow-ms hover:shadow-md transition"
-                     key={username.id}>
+                     key={user.user}>
 
-                        <button onClick={() => deleteUser(username.id)} 
+                        <button onClick={() => deleteUser(user.id)} 
                             className="text-red-500 hover:text-red-700"
                             aria-label="Delete">
                             <VscChromeClose size={20} />
                         </button>
 
                         <div className="username-email">
-                            <p className='text-lg font-medium'>Username: {username.user}</p> <br />
+                            <p className='text-lg font-medium'>Username: {user.user}</p> <br />
                             
-                            <p className='text-sm text-gray-600'>Laptime: {username.total_time}</p>
+                            <p className='text-sm text-gray-600'>Fastest lap time: {user.fastest_lap}</p>
                         </div>
                     </div>
                 ))}

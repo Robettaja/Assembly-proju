@@ -99,7 +99,13 @@ def lap_completed(request):
 
 @api_view(['POST'])
 def save_laps(request):
-    serializer = SaveLapsSerializer(data=request.data)
+    data = request.data
+
+    if isinstance(data, list):
+        serializer = SaveLapsSerializer(data=data, many=True)
+    else:
+        serializer = SaveLapsSerializer(data=data)
+
     if serializer.is_valid():
         serializer.save()
         return Response({"message": "Lap times saved succesfully."}, status=status.HTTP_201_CREATED)
@@ -153,7 +159,7 @@ def leaderboard_view(request):
     leaderboard = []
 
     for user in users:
-        lap_times = LapTime.objects.filter(race_session__user=user)
+        lap_times = LapTime.objects.filter(user=user)
         if not lap_times.exists():
             continue
 

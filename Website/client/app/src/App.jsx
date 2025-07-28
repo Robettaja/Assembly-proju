@@ -172,14 +172,14 @@ function App() {
   }, [isRunning]);
 
   const handleCountdownComplete = () => {
-  fetch("http://127.0.0.1:8000/api/start/", {
-    method: "POST"
-  })
-    .then((res) => res.json())
-    .then((data) => console.log("Race started from backend.", data))
-    .catch((err) => console.error("Failed to start race", err));
+    fetch("http://127.0.0.1:8000/api/start/", {
+      method: "POST"
+    })
+      .then((res) => res.json())
+      .then((data) => console.log("Race started from backend.", data))
+      .catch((err) => console.error("Failed to start race", err));
 
-  };
+    };
 
       
   return (
