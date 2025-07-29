@@ -163,7 +163,7 @@ def get_track_mask(image):
     blur = cv.GaussianBlur(gray, (21, 21), 0)
 
     inv = cv.bitwise_not(blur)
-    ret, thresh = cv.threshold(inv, 95, 255, cv.THRESH_BINARY)
+    ret, thresh = cv.threshold(inv, 155, 255, cv.THRESH_BINARY)
     kernel = np.ones((1, 1), np.uint8)
     dilated = cv.dilate(thresh, kernel, iterations=2)
     contours, _ = cv.findContours(dilated, cv.RETR_TREE, cv.CHAIN_APPROX_SIMPLE)
@@ -381,7 +381,6 @@ def race_analyze(player1, race_data=RaceData(1, False)):
         line,
         checkpoint1,
         line,
-        checkpoint2,
         checkpoint1,
         checkpoint2,
         line,
@@ -467,8 +466,6 @@ def race_analyze(player1, race_data=RaceData(1, False)):
                 if user.lapsCompleted == race_data.laps:
                     user.completedRace = True
 
-                save_lap_time(user.username, user.lapTime[-1], user.raceTime)
-        
         cv.imshow("Frame", last_car)
         # Exit on 'q' key press
         if cv.waitKey(1) & 0xFF == ord("q"):

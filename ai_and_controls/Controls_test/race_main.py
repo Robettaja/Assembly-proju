@@ -117,15 +117,16 @@ def py_thread():
             dt = clock.tick(60) / 1000
             for player in users:
                 joystick = joystics[player.controller_id]
-                if player.completedRace:
-                    continue
-                if player.is_on_track:
-                    player.raceTime += dt
-                    player.speed = 1
-                else:
-                    joystick.rumble(1, 1, 4)  # Reset rumble
-                    player.raceTime += dt * 2
-                    player.speed = 0.5
+                if player.checkpointIndex != 0:
+                    if player.completedRace:
+                        continue
+                    if player.is_on_track:
+                        player.raceTime += dt
+                        player.speed = 1
+                    else:
+                        joystick.rumble(1, 1, 4)  # Reset rumble
+                        player.raceTime += dt * 2
+                        player.speed = 0.5
 
                 x = joystick.get_axis(0) * player.speed
                 y = -joystick.get_axis(3) * player.speed
@@ -157,7 +158,7 @@ async def handle_device(device, player_number):
 
                 payload = struct.pack("ff", x, y)
                 await client.write_gatt_char(CHAR_UUID, payload, response=False)
-                await asyncio.sleep(1 / 100)
+                await asyncio.sleep(1 / 30)
 
             except Exception as e:
                 await asyncio.sleep(0.05)
