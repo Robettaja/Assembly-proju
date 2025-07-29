@@ -7,7 +7,8 @@ import numpy as np
 import queue
 from pathlib import Path
 
-
+import shutil
+print(shutil.which("ffmpeg"))
 
 line_pos_x = ""
 line_pos_y = ""
@@ -51,7 +52,7 @@ def read_frames():
     rtsp = "rtsp://raspberrypi:8554/cam1"
 
     cmd = [
-        "ffmpeg",
+        r"C:\Users\saija\scoop\apps\ffmpeg\current\bin\ffmpeg.exe",
         "-fflags",
         "nobuffer",
         "-flags",
@@ -465,6 +466,8 @@ def race_analyze(player1, race_data=RaceData(1, False)):
                 user.nextCheckpointIndex = 1
                 if user.lapsCompleted == race_data.laps:
                     user.completedRace = True
+
+                save_lap_time(user.username, user.lapTimes[-1], user.raceTime)
 
         cv.imshow("Frame", last_car)
         # Exit on 'q' key press

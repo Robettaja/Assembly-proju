@@ -4,6 +4,7 @@ const Countdown = ({ onLap, onFinish, userIds, username1, numLaps, onCountdownCo
     const [countdownTime, setCountdownTime] = useState(2);
     const [timerRunning, setTimerRunning] = useState(false);
     const [elapsedTime, setElapsedTime] = useState(0);
+    const [user1LapsRaw, setUser1LapsRaw] = useState([]);
 
     const [user1Laps, setUser1Laps] = useState([]);
     const [user1Finished, setUser1Finished] = useState(false);
@@ -60,13 +61,14 @@ const Countdown = ({ onLap, onFinish, userIds, username1, numLaps, onCountdownCo
             sendLapData({
                 user_id: userIds[0],
                 total_time: user1Total,
-                laps: user1Laps.map((lap, i) => ({
+                lap_times: user1LapsRaw.map((lapMs, i) => ({
                     lap_number: i + 1,
-                    lap_time: lap,
+                    lap_time: lapMs,
+
                 })),
             });
 
-            onFinish?.({ user1Total });
+            onFinish?.({ user1Total: formatElapsed(user1Total) });
         }
     }, [user1Finished]);
 
@@ -118,6 +120,8 @@ const Countdown = ({ onLap, onFinish, userIds, username1, numLaps, onCountdownCo
 
             return updated;
         });
+
+        setUser1LapsRaw((prev) => [...prev, lapDuration]);
     };
 
     return (

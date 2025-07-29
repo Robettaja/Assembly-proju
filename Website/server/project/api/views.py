@@ -99,17 +99,37 @@ def lap_completed(request):
 
 @api_view(['POST'])
 def save_laps(request):
+
+
     data = request.data
 
     if isinstance(data, list):
         serializer = SaveLapsSerializer(data=data, many=True)
     else:
         serializer = SaveLapsSerializer(data=data)
+    
+    if not serializer.is_valid():
+        print("DEBUG - serializer errors.", serializer.errors)
+        return Response(serializer.errors, status=400)
+   
+   
+    serializer.save()
+    return Response({"message": "Lap times saved succesfully"}, status=status.HTTP_201_CREATED)
 
+
+@api_view(['PUT'])
+def update_laps(request, user_id):
+    try: 
+        user = Username.objects.get(pk=user_id)
+    except Username.DoesNotExist:
+        return Response({'error': 'User not found'}, status=404)
+    
+    serializer = SaveLapsSerializer(instance=user, data=request.data)
     if serializer.is_valid():
         serializer.save()
-        return Response({"message": "Lap times saved succesfully."}, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data)
+    return Response(serializer.errors, status=400)
+
 
 @api_view(['POST'])
 def bulk_create_laptimes(request):
@@ -139,7 +159,7 @@ def get_user_laptimes(request, username):
 
     fastest_lap = min(
         lap_times,
-        key=lambda lap: float(lap.lap_time.replace(',', ',')),
+        key=lambda lap: float(lap.lap_time.replace(',', '.')),
         default=None
     ) 
 

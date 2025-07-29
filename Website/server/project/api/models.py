@@ -33,7 +33,7 @@ class RaceSession(models.Model):
 class LapTime(models.Model):
     user = models.ForeignKey(Username, on_delete=models.CASCADE, related_name='lap_times')
     lap_number = models.IntegerField()
-    lap_time = models.CharField(max_length=20)
+    lap_time = models.DecimalField(max_digits=20, decimal_places=3)
 
     def __str__(self):
         return f"{self.user.user} - Lap {self.lap_number}: {self.lap_time}"
