@@ -156,7 +156,7 @@ async def handle_device(device, player_number):
 
                 payload = struct.pack("ff", x, y)
                 await client.write_gatt_char(CHAR_UUID, payload, response=False)
-                await asyncio.sleep(1 / 100)
+                await asyncio.sleep(1 / 30)
 
             except Exception as e:
                 await asyncio.sleep(0.05)
