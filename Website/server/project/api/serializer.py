@@ -6,7 +6,7 @@ from .models import Username, LapTime, RaceSession
 class LapTimeSerializer(serializers.ModelSerializer):
     class Meta:
         model = LapTime
-        fields = ['lap_number', 'lap_time']
+        fields = ['user', 'lap_number', 'lap_time']
 
 class UsernameSerializer(serializers.ModelSerializer):
     lap_times = LapTimeSerializer(many=True, read_only=True)
