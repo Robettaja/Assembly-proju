@@ -7,6 +7,8 @@ import numpy as np
 import queue
 from pathlib import Path
 
+
+
 line_pos_x = ""
 line_pos_y = ""
 frame_queue = queue.Queue(maxsize=1)
@@ -358,6 +360,8 @@ def save_checkpoints():
 
 
 def race_analyze(player1, race_data=RaceData(1, False)):
+    from race_main import save_lap_time
+    
     users = [player1]
     RESIZE_WIDTH = 1280
     RESIZE_HEIGHT = 640
@@ -463,6 +467,8 @@ def race_analyze(player1, race_data=RaceData(1, False)):
                 if user.lapsCompleted == race_data.laps:
                     user.completedRace = True
 
+                save_lap_time(user.username, user.lapTime[-1], user.raceTime)
+        
         cv.imshow("Frame", last_car)
         # Exit on 'q' key press
         if cv.waitKey(1) & 0xFF == ord("q"):

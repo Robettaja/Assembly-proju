@@ -32,7 +32,7 @@ def save_lap_time(username, laps, total_time):
 
     try:
         response = requests.post("http://localhost:8000/api/save-laps", json=data)
-        if response.status_code == 201:
+        if response.status_code in (200, 201):
             print(
                 f"\033[94m[INFO]\033[0mLap time saved to backend for player {username}"
             )
@@ -43,6 +43,7 @@ def save_lap_time(username, laps, total_time):
             )
     except requests.exceptions.RequestException as e:
         print(f"\033[91m[ERROR]Request error: {e}\033[0m")
+
 
 
 def race_over():
@@ -190,10 +191,11 @@ async def run():
     await asyncio.gather(*tasks)
 
 
-from track_vision import race_loop, initialize_data
 
 
 def start_race():
+    from track_vision import race_loop, initialize_data
+
     users.append(User(2, "Player1", 0))
     race_data = RaceData(laps=1, clockwise=False)
 

@@ -33,6 +33,7 @@ const Countdown = ({ onLap, onFinish, userIds, username1, numLaps, onCountdownCo
             clearInterval(countdownRef.current);
             setTimerRunning(true);
             onCountdownComplete?.(); // Laukaise auton liikkeelle
+            triggerRaceStart(); // Lähettää käskyn API:lle
         }
 
         return () => clearInterval(countdownRef.current);
@@ -85,6 +86,19 @@ const Countdown = ({ onLap, onFinish, userIds, username1, numLaps, onCountdownCo
         }
     };
 
+    const triggerRaceStart = async () => {
+        try {
+            console.log("Triggering race start via FLASK API");
+            const response = await fetch("http://127.0.0.1:5000/start-race", {
+                method: "POST",
+            });
+            if (!response.ok) throw new Error("Race start trigger failed");
+            console.log("Flask acknowledged race start");
+        } catch (err) {
+            console.error("Failed to trigger race start:", err)
+        }
+    };
+
     const handleLap = () => {
         const now = Date.now();
         const lapDuration = now - lapStartTimeRef.current;
@@ -93,11 +107,13 @@ const Countdown = ({ onLap, onFinish, userIds, username1, numLaps, onCountdownCo
 
         setUser1Laps((prev) => {
             const updated = [...prev, formattedLapTime];
+            console.log(`Lap ${updated.length}: ${formattedLapTime}`);
             onLap?.(0, formattedLapTime);
 
             if (updated.length === numLaps) {
                 setUser1Finished(true);
                 user1FinishRef.current = now;
+                console.log("All laps completed");
             }
 
             return updated;
@@ -106,7 +122,7 @@ const Countdown = ({ onLap, onFinish, userIds, username1, numLaps, onCountdownCo
 
     return (
         <div className="p4 text-center">
-            <h2 className="text-xl mb-2">Countdown / timer</h2>
+            <h2 className="text-xl mb-2">Countdown</h2>
             <div className="text-4xl font-bold mb-4">
                 {countdownTime > 0 ? countdownTime : formatElapsed(elapsedTime)}
             </div>
@@ -125,12 +141,15 @@ const Countdown = ({ onLap, onFinish, userIds, username1, numLaps, onCountdownCo
                         <h3>Laps:</h3>
                         <ul>
                             {user1Laps.map((lap, i) => (
-                                <li key={i}>{lap}</li>
+                                <li key={i}>
+                                    {i + 1}: {lap}
+                                </li>
                             ))}
                         </ul>
                         {user1Laps.length === numLaps && (
                             <div>
-                                Total time: {formatElapsed(user1FinishRef.current - startTimeRef.current)}
+                                <strong>Total time:</strong>{" "} 
+                                {formatElapsed(user1FinishRef.current - startTimeRef.current)}
                             </div>
                         )}
                     </div>
