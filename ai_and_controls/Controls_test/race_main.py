@@ -45,7 +45,6 @@ def save_lap_time(username, laps, total_time):
         print(f"\033[91m[ERROR]Request error: {e}\033[0m")
 
 
-
 def race_over():
     for user in users:
         if not user.completedRace:
@@ -190,8 +189,6 @@ async def run():
             return
 
     await asyncio.gather(*tasks)
-
-
 
 
 def start_race():
