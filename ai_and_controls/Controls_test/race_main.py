@@ -116,7 +116,7 @@ def py_thread():
             dt = clock.tick(60) / 1000
             for player in users:
                 joystick = joystics[player.controller_id]
-                if player.checkpointIndex != 0:
+                if player.nextCheckpointIndex != 0:
                     if player.completedRace:
                         continue
                     if player.is_on_track:
