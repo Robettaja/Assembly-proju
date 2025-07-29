@@ -377,7 +377,6 @@ def race_analyze(player1, race_data=RaceData(1, False)):
         line,
         checkpoint1,
         line,
-        checkpoint2,
         checkpoint1,
         checkpoint2,
         line,

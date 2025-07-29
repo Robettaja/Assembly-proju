@@ -116,15 +116,16 @@ def py_thread():
             dt = clock.tick(60) / 1000
             for player in users:
                 joystick = joystics[player.controller_id]
-                if player.completedRace:
-                    continue
-                if player.is_on_track:
-                    player.raceTime += dt
-                    player.speed = 1
-                else:
-                    joystick.rumble(1, 1, 4)  # Reset rumble
-                    player.raceTime += dt * 2
-                    player.speed = 0.5
+                if player.checkpointIndex != 0:
+                    if player.completedRace:
+                        continue
+                    if player.is_on_track:
+                        player.raceTime += dt
+                        player.speed = 1
+                    else:
+                        joystick.rumble(1, 1, 4)  # Reset rumble
+                        player.raceTime += dt * 2
+                        player.speed = 0.5
 
                 x = joystick.get_axis(0) * player.speed
                 y = -joystick.get_axis(3) * player.speed
