@@ -8,10 +8,6 @@ import requests
 import time
 import pygame
 
-import sys
-import os
-
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 frame_lock = threading.Lock()
 
@@ -21,6 +17,14 @@ controller_locks = {}
 users = []
 
 PLAYER_DEVICE_MAP = {}
+
+
+def can_connect(url: str, timeout: int = 5) -> bool:
+    try:
+        response = requests.get(url, timeout=timeout)
+        return response.status_code == 200
+    except requests.RequestException:
+        return False
 
 
 def save_lap_time(username, laps, total_time):
@@ -194,7 +198,7 @@ async def run():
 def start_race():
     from track_vision import race_loop, initialize_data
 
-    users.append(User(2, "Player1", 0))
+    users.append(User(1, "Player1", 0))
     race_data = RaceData(laps=1, clockwise=False)
 
     if not check_controllers():
@@ -207,7 +211,8 @@ def start_race():
         DEVICES.append("CAR" + str(users[0].car_num))
         PLAYER_DEVICE_MAP[i + 1] = "CAR" + str(users[0].car_num)
     threading.Thread(target=py_thread, daemon=True).start()
-    race_loop(users[0], race_data)
+    if can_connect("rtsp://raspberrypi:8554/cam1", 2):
+        race_loop(users[0], race_data)
 
     asyncio.run(run())
 

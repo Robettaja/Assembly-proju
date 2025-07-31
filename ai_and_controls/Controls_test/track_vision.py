@@ -7,8 +7,6 @@ import numpy as np
 import queue
 from pathlib import Path
 
-import shutil
-print(shutil.which("ffmpeg"))
 
 line_pos_x = ""
 line_pos_y = ""
@@ -362,7 +360,7 @@ def save_checkpoints():
 
 def race_analyze(player1, race_data=RaceData(1, False)):
     from race_main import save_lap_time
-    
+
     users = [player1]
     RESIZE_WIDTH = 1280
     RESIZE_HEIGHT = 640
