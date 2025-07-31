@@ -37,5 +37,13 @@ Generate your **AprilTag 25h9** marker here:
 Install all required packages via pip:
 
 ```bash
-pip install -r requirements.txt
+pip install bleak pygame opencv-python numpy requests
+
 ```
+
+## Setup Instructions
+
+- Attach the AprilTag 25h9 marker to your RC car.
+- Setup camera and track without anything on track
+- Generate track data running `python track_vision.py `
+- Start race using `python race_main.py`
