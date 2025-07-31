@@ -66,7 +66,8 @@ python track_vision.py
 4. Start the race
 Once the track data is generated, launch the race with:
 ```bash
-python race_main.py ```
+python race_main.py 
+```
 
 
 ## ⚠️ Possible Errors and How to Fix Them
