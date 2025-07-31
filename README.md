@@ -24,6 +24,15 @@ Generate your **AprilTag 25h9** marker here:
 - RTSP stream analysis
 - Automatic track and checkpoint detection
 
+## Important files
+
+Assembly-proju/
+└── ai_and_controls/
+    └── Controls_test/
+        ├── 🐍 race_main.py          
+        ├── 🐍 track_vision.py       
+        └── 📁 test_data/
+
 ---
 
 ## 🧰 Requirements
