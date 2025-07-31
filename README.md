@@ -25,9 +25,6 @@ Generate your **AprilTag 25h9** marker here:
 - Automatic track and checkpoint detection
 
 ## Important files
-
-```
-```
 ```
 Assembly-proju/
     └── ai_and_controls/
