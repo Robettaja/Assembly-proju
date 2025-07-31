@@ -50,7 +50,7 @@ pip install bleak pygame opencv-python numpy requests
 
 ```
 
-## Setup Instructions
+##   Setup Instructions
 
 1. Attach the AprilTag 25h9 marker
 Securely place the AprilTag 25h9 marker on your RC car to enable accurate tracking.
@@ -67,5 +67,3 @@ python track_vision.py
 Once the track data is generated, launch the race with:
 ```bash
 python race_main.py
-```
-```
