@@ -52,7 +52,20 @@ pip install bleak pygame opencv-python numpy requests
 
 ## Setup Instructions
 
-- Attach the AprilTag 25h9 marker to your RC car.
-- Setup camera and track without anything on track
-- Generate track data running `python track_vision.py `
-- Start race using `python race_main.py`
+1. Attach the AprilTag 25h9 marker
+Securely place the AprilTag 25h9 marker on your RC car to enable accurate tracking.
+
+2. Set up the camera and track
+Position your camera to cover the entire track area. Make sure the track is clear — no obstacles or objects on it.
+
+3. Generate track data
+Run the following command to capture and process the track layout:
+```bash
+python track_vision.py
+```
+4. Start the race
+Once the track data is generated, launch the race with:
+```bash
+python race_main.py
+```
+```
