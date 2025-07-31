@@ -66,8 +66,8 @@ python track_vision.py
 4. Start the race
 Once the track data is generated, launch the race with:
 ```bash
-python race_main.py
-
+python race_main.py ```
+## ⚠️ Possible Errors and How to Fix Them
 
 ### 1. **No BLE Device Found**
 - **Cause:** The RC car is not powered on, not advertising, or the device name is incorrect.
@@ -117,5 +117,3 @@ python race_main.py
   - Confirm the checkpoints images (`checkpoint1.jpg`, `checkpoint2.jpg`) were generated correctly.  
   - Verify the car crosses checkpoints fully during laps.  
   - Improve camera angle or increase frame rate to reduce missed detections.
-
----
