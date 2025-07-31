@@ -67,6 +67,8 @@ python track_vision.py
 Once the track data is generated, launch the race with:
 ```bash
 python race_main.py ```
+
+
 ## ⚠️ Possible Errors and How to Fix Them
 
 ### 1. **No BLE Device Found**
