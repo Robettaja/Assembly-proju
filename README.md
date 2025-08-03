@@ -63,7 +63,7 @@ pip install bleak pygame opencv-python numpy requests
 3. Generate track data
    Run the following command to capture and process the track layout:
 
-### PLEASE REMOVE EVERYFILE FROM track_data folder before running this command
+### PLEASE REMOVE EVERY FILE FROM track_data folder before running this command
 
 ```bash
 python track_vision.py
